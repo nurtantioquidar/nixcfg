@@ -1,7 +1,7 @@
 { pkgs, ... } @ args:
 
 let
-  username = "noghartt";
+  username = "hades";
   mkImports = import ../../lib/mkImports.nix args;
 in
 {
@@ -12,19 +12,26 @@ in
 
     imports = [
       ./homebrew.nix
-      ./launchd.nix
+      # ./launchd.nix
     ];
   };
 
   services.nix-daemon.enable = true;
 
   environment.shells = with pkgs; [ fish zsh ];
+  environment.systemPackages =
+    [
+      pkgs.mkalias
+      pkgs.neovim
+      pkgs.tmux
+      pkgs.google-chrome
+    ];
 
   programs.fish.enable = true;
 
-  users.users.noghartt = {
-    home = "/Users/noghartt";
-
+  users.users.hades = {
+    uid = 501;
+    home = "/Users/hades";
     shell = pkgs.fish;
   };
 
@@ -33,4 +40,8 @@ in
     experimental-features = nix-command flakes
     extra-platforms = x86_64-darwin aarch64-darwin
   '';
+
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
+  ];
 }

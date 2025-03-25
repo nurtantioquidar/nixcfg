@@ -33,7 +33,7 @@
       let
         inherit (inputs.nix-darwin.lib) darwinSystem;
       in {
-        "MacBook-Pro-de-Guilherme" = darwinSystem {
+        "styx" = darwinSystem {
           system = "aarch64-darwin";
 
           specialArgs = { inherit inputs; };
@@ -47,7 +47,7 @@
 
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.noghartt = import ./nix/home/home.nix;
+              home-manager.users.hades = import ./nix/home/home.nix;
             }
           ];
         };
@@ -65,7 +65,6 @@
           statix
           nixpkgs-fmt
           rust-bin.beta.latest.default
-          nodejs_22
         ];
       };
     }

@@ -10,7 +10,7 @@ in
         beancount-fava = {
           command = "/opt/homebrew/bin/fava ${beancount_ledger_folder}/2025.bean";
           serviceConfig = {
-            UserName = "noghartt";
+            UserName = "hades";
             KeepAlive = true;
             RunAtLoad = true;
             StandardOutPath = "/tmp/fava_beancount.out.log";
@@ -20,7 +20,7 @@ in
 
         beancount-commit = {
           serviceConfig = {
-            UserName = "noghartt";
+            UserName = "hades";
             KeepAlive = true;
             RunAtLoad = true;
             StandardOutPath = "/tmp/beancount-commit.out.log";

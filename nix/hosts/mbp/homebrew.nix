@@ -6,7 +6,7 @@ _:
 
     enableRosetta = true;
 
-    user = "noghartt";
+    user = "hades";
 
     autoMigrate = true;
   };
@@ -15,17 +15,38 @@ _:
     enable = true;
 
     brews = [
-      "ollama"
+      "mas"
+      "oci-cli"
+      "kubernetes-cli"
+      "gpg2"
+      "gnupg"
+      "pinentry-mac"
     ];
 
     casks = [
-      "firefox"
-      "1password-cli"
-      "discord"
-      "alacritty"
+      "hammerspoon"
+      "iina"
+      "the-unarchiver"
+      "slack"
+      "pritunl"
+      "wezterm"
+      "visual-studio-code"
+      "mullvadvpn"
+      "raycast"
       "spotify"
-      "ghostty"
-      "rescuetime"
+      "lens"
+      "google-cloud-sdk"
+      "1password"
+      "zoom"
     ];
+
+    masApps = {
+        "Magnet" = 441258766;
+        "Wipr" = 1320666476;
+        "Wipr 2" = 1662217862;
+        "UpNote: notes, diary, journal" = 1398373917;
+        "WhatsApp Messenger" = 310633997;
+    };
+    onActivation.cleanup = "zap";
   };
 }
