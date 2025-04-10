@@ -38,6 +38,7 @@ _:
       "google-cloud-sdk"
       "1password"
       "zoom"
+      "scroll-reverser"
     ];
 
     masApps = {
