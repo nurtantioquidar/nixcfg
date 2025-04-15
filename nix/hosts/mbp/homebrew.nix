@@ -39,6 +39,8 @@ _:
       "1password"
       "zoom"
       "scroll-reverser"
+      "fleet"
+      "mos"
     ];
 
     masApps = {
