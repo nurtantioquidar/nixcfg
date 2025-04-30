@@ -2,6 +2,7 @@
 
 {
   home.stateVersion = "25.05";
+  home.file.".config/wezterm/wezterm.lua".source = ../dotfiles/wezterm.lua;
 
   home.packages = with pkgs; [
     htop
