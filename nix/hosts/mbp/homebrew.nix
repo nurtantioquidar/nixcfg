@@ -41,6 +41,7 @@ _:
       "zoom"
       "scroll-reverser"
       "mos"
+      "postman"
     ];
 
     masApps = {
