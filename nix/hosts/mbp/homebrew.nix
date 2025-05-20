@@ -22,7 +22,6 @@ _:
       "gnupg"
       "pinentry-mac"
       "argocd"
-      "bruno"
     ];
 
     casks = [
