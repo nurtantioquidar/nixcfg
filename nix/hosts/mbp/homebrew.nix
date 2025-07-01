@@ -14,6 +14,10 @@ _:
   homebrew = {
     enable = true;
 
+    taps = [
+      "homebrew/bundle"
+    ];
+
     brews = [
       "mas"
       "oci-cli"
@@ -23,7 +27,6 @@ _:
       "pinentry-mac"
       "argocd"
       "slackdump"
-      "node"
     ];
 
     casks = [
@@ -53,6 +56,9 @@ _:
         "UpNote: notes, diary, journal" = 1398373917;
         "WhatsApp Messenger" = 310633997;
     };
-    onActivation.cleanup = "zap";
+    onActivation = {
+      cleanup = "zap";
+      autoUpdate = false;
+    };
   };
 }
