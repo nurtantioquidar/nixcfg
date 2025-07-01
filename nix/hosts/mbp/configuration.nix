@@ -16,7 +16,9 @@ in
     ];
   };
 
-  services.nix-daemon.enable = true;
+  system.primaryUser = "hades";
+
+  nix.enable = false;
 
   environment.shells = with pkgs; [ fish zsh ];
   environment.systemPackages =

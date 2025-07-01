@@ -27,6 +27,7 @@ _:
       "pinentry-mac"
       "argocd"
       "slackdump"
+      "node"
     ];
 
     casks = [
