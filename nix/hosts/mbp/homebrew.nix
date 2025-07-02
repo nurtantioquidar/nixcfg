@@ -38,7 +38,7 @@ _:
       "pritunl"
       "wezterm"
       "visual-studio-code"
-      "mullvadvpn"
+      "mullvad-vpn"
       "raycast"
       "spotify"
       "lens"
