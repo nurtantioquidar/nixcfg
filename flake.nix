@@ -14,6 +14,9 @@
 
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
 
+    nixos-wsl.url = "github:nix-community/NixOS-WSL";
+    nixos-wsl.inputs.nixpkgs.follows = "nixpkgs";
+
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -42,6 +45,30 @@
             inputs.nix-homebrew.darwinModules.nix-homebrew
             inputs.home-manager.darwinModules.home-manager
             ./nix/hosts/mbp/configuration.nix
+            {
+              nixpkgs = nixpkgsConfig;
+
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.hades = import ./nix/home/home.nix;
+            }
+          ];
+        };
+      };
+
+    nixosConfigurations =
+      let
+        inherit (nixpkgs.lib) nixosSystem;
+      in {
+        "wsl" = nixosSystem {
+          system = "x86_64-linux";
+
+          specialArgs = { inherit inputs; };
+
+          modules = [
+            inputs.nixos-wsl.nixosModules.wsl
+            inputs.home-manager.nixosModules.home-manager
+            ./nix/hosts/wsl/configuration.nix
             {
               nixpkgs = nixpkgsConfig;
 

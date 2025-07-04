@@ -48,15 +48,18 @@ _:
       "scroll-reverser"
       "mos"
       "postman"
+      "jordanbaird-ice"
     ];
 
-    masApps = {
-        "Magnet" = 441258766;
-        "Wipr" = 1320666476;
-        "Wipr 2" = 1662217862;
-        "UpNote: notes, diary, journal" = 1398373917;
-        "WhatsApp Messenger" = 310633997;
-    };
+    # MAS apps managed by separate script (mas-install.sh) for better state management
+    # Run: ./nix/hosts/mbp/mas-install.sh after darwin-rebuild
+    # masApps = {
+    #     "Magnet" = 441258766;
+    #     "Wipr" = 1320666476;
+    #     "Wipr 2" = 1662217862;
+    #     "UpNote: notes, diary, journal" = 1398373917;
+    #     "WhatsApp Messenger" = 310633997;
+    # };
     onActivation = {
       cleanup = "zap";
       autoUpdate = false;
