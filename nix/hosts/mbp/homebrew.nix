@@ -28,6 +28,8 @@ _:
       "argocd"
       "slackdump"
       "node"
+      "docker-compose"
+      "docker"
     ];
 
     casks = [
@@ -49,6 +51,7 @@ _:
       "mos"
       "postman"
       "jordanbaird-ice"
+      "claude"
     ];
 
     # MAS apps managed by separate script (mas-install.sh) for better state management
