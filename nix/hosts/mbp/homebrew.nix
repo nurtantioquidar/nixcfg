@@ -30,6 +30,7 @@ _:
       "node"
       "docker-compose"
       "docker"
+      "colima"
     ];
 
     casks = [
