@@ -42,6 +42,7 @@ _:
       gd = "git diff";
       gs = "git status";
       ll = "ls -ltra";
+      claude = "/Users/hades/.claude/local/claude";
     };
   };
 }
