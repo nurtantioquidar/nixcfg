@@ -54,6 +54,7 @@ _:
       "jordanbaird-ice"
       "claude"
       "windsurf"
+      "act"
     ];
 
     # MAS apps managed by separate script (mas-install.sh) for better state management
