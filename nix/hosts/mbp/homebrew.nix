@@ -19,18 +19,19 @@ _:
     ];
 
     brews = [
-      "mas"
-      "oci-cli"
-      "kubernetes-cli"
-      "gpg2"
-      "gnupg"
-      "pinentry-mac"
+      "act"
       "argocd"
-      "slackdump"
-      "node"
-      "docker-compose"
-      "docker"
       "colima"
+      "docker"
+      "docker-compose"
+      "gnupg"
+      "gpg2"
+      "kubernetes-cli"
+      "mas"
+      "node"
+      "oci-cli"
+      "pinentry-mac"
+      "slackdump"
     ];
 
     casks = [
