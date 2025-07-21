@@ -32,6 +32,7 @@ _:
       "oci-cli"
       "pinentry-mac"
       "slackdump"
+      "gh"
     ];
 
     casks = [
