@@ -57,6 +57,7 @@ _:
       "claude"
       "windsurf"
       "firefox"
+      "floorp"
     ];
 
     # MAS apps managed by separate script (mas-install.sh) for better state management
