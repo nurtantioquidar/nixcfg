@@ -33,6 +33,7 @@ _:
       "pinentry-mac"
       "slackdump"
       "gh"
+      "woff2"
     ];
 
     casks = [
