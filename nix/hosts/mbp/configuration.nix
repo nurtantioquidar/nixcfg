@@ -18,6 +18,24 @@ in
 
   system.primaryUser = "hades";
 
+  networking.hostName = "styx";
+
+  system.defaults = {
+    dock = {
+      orientation = "left";
+      autohide = true;
+      show-recents = false;
+      static-only = true;
+      tilesize = 30;
+      persistent-apps = [
+        "/Applications/Windsurf.app"
+        "/Applications/Google Chrome.app"
+        "/Applications/Slack.app"
+        "/Applications/WezTerm.app"
+      ];
+    };
+  };
+
   nix.enable = false;
 
   environment.shells = with pkgs; [ fish zsh ];
