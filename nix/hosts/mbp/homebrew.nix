@@ -15,7 +15,6 @@ _:
     enable = true;
 
     taps = [
-      "homebrew/bundle"
     ];
 
     brews = [
@@ -34,6 +33,7 @@ _:
       "slackdump"
       "gh"
       "woff2"
+      "uv"
     ];
 
     casks = [
@@ -53,13 +53,13 @@ _:
       "zoom"
       "scroll-reverser"
       "mos"
-      "postman"
       "jordanbaird-ice"
       "claude"
       "windsurf"
       "firefox"
-      "floorp"
       "gcloud-cli"
+      "cursor"
+      "orion"
     ];
 
     # MAS apps managed by separate script (mas-install.sh) for better state management
