@@ -18,6 +18,7 @@ _:
       fish_add_path -amP /opt/local/bin
       fish_add_path -m /run/current-system/sw/bin
       fish_add_path -m $HOME/.nix-profile/bin
+      fish_add_path -m $HOME/.local/bin
 
       function fish_prompt
           set -l level $SHLVL
@@ -42,7 +43,6 @@ _:
       gd = "git diff";
       gs = "git status";
       ll = "ls -ltra";
-      claude = "/Users/hades/.claude/local/claude";
     };
   };
 }
