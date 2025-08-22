@@ -38,6 +38,8 @@
 
   # Ensure fonts are refreshed after installation
   home.activation.refreshFonts = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    run ${pkgs.fontconfig}/bin/fc-cache -f
+    if [ -d "$HOME/.local/share/fonts" ]; then
+      run ${pkgs.fontconfig}/bin/fc-cache -f -v "$HOME/.local/share/fonts" || true
+    fi
   '';
 }
