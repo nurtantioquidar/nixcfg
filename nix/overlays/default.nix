@@ -20,4 +20,6 @@ in
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [pythonPackageExtensionsOverrides];
 
   calibre = callPackage ./calibre { };
+  
+  atlassian-fonts = callPackage ./atlassian-fonts { };
 }

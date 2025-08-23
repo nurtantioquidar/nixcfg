@@ -63,5 +63,6 @@ in
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
+    atlassian-fonts
   ];
 }

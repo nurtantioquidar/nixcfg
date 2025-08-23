@@ -32,7 +32,7 @@
     </fontconfig>
   '';
 
-  # Copy fonts instead of symlinking for better macOS compatibility
+  # Copy fonts and register them with macOS properly
   home.activation.installFonts = lib.hm.dag.entryAfter ["writeBoundary"] ''
     echo "Installing custom fonts to ~/Library/Fonts..."
     
@@ -50,5 +50,7 @@
     run ${pkgs.fontconfig}/bin/fc-cache -f -v "$HOME/Library/Fonts" || true
     
     echo "Custom fonts installed successfully."
+    echo "Note: You may need to restart Font Book to see the new fonts."
+    echo "The fonts are available to applications immediately."
   '';
 }

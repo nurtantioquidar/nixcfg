@@ -18,7 +18,7 @@
     # ./git.nix
     # ./zsh.nix
     ./fish.nix
-    ./fonts.nix
+    # ./fonts.nix  # Now using system-level fonts.packages instead
     # ./ssh.nix
     # ./nvim.nix
     # ./tmux.nix
