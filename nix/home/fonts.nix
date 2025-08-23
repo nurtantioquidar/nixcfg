@@ -6,10 +6,10 @@
     fontconfig
   ];
 
-  # Custom fonts installation
+  # Custom fonts installation - use macOS user fonts directory
   home.file = {
-    ".local/share/fonts/AtlassianMono-latin.ttf".source = ../../assets/fonts/AtlassianMono-latin.ttf;
-    ".local/share/fonts/AtlassianSans-latin.ttf".source = ../../assets/fonts/AtlassianSans-latin.ttf;
+    "Library/Fonts/AtlassianMono-latin.ttf".source = ../../assets/fonts/AtlassianMono-latin.ttf;
+    "Library/Fonts/AtlassianSans-latin.ttf".source = ../../assets/fonts/AtlassianSans-latin.ttf;
   };
 
   # Configure fontconfig to recognize the fonts
@@ -17,7 +17,7 @@
     <?xml version="1.0"?>
     <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
     <fontconfig>
-      <dir>~/.local/share/fonts</dir>
+      <dir>~/Library/Fonts</dir>
       
       <!-- Alias for Atlassian fonts -->
       <alias>
@@ -38,8 +38,8 @@
 
   # Ensure fonts are refreshed after installation
   home.activation.refreshFonts = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    if [ -d "$HOME/.local/share/fonts" ]; then
-      run ${pkgs.fontconfig}/bin/fc-cache -f -v "$HOME/.local/share/fonts" || true
+    if [ -d "$HOME/Library/Fonts" ]; then
+      run ${pkgs.fontconfig}/bin/fc-cache -f -v "$HOME/Library/Fonts" || true
     fi
   '';
 }
