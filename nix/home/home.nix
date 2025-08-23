@@ -18,7 +18,7 @@
     # ./git.nix
     # ./zsh.nix
     ./fish.nix
-    # ./fonts.nix  # Now using system-level fonts.packages instead
+    ./fonts-working.nix  # Testing comprehensive font installation
     # ./ssh.nix
     # ./nvim.nix
     # ./tmux.nix
