@@ -1,26 +1,49 @@
 #!/usr/bin/env bash
 
-echo "🔍 Testing font installation..."
+echo "Testing Atlassian font installation..."
 
-echo "📁 Fonts in ~/Library/Fonts:"
-ls -la ~/Library/Fonts/ | grep -i atlassian
-
-echo ""
-echo "🔧 Fontconfig detection:"
-fc-list | grep -i atlassian
+echo "1. Checking if fonts are in ~/Library/Fonts:"
+ls -la ~/Library/Fonts/Atlassian* 2>/dev/null || echo "  No fonts found in ~/Library/Fonts"
 
 echo ""
-echo "🍎 macOS font validation:"
-/usr/bin/atsutil fonts -list | grep -i atlassian || echo "Not found in atsutil fonts list"
+echo "2. Checking if fonts are in nix store:"
+find /nix/store -name "*atlassian*" -type d 2>/dev/null | head -5
 
 echo ""
-echo "📖 Trying to refresh Font Book database..."
-echo "Note: This might require admin privileges for system-wide refresh"
-
-# Try to refresh just user fonts
-killall "Font Book" 2>/dev/null || true
+echo "3. Checking current nix-darwin system fonts:"
+if [ -d "/run/current-system/sw/share/fonts" ]; then
+    find /run/current-system/sw/share/fonts -name "*tlassian*" 2>/dev/null || echo "  No Atlassian fonts found in system fonts"
+else
+    echo "  System fonts directory not found (may need darwin-rebuild)"
+fi
 
 echo ""
-echo "✅ Manual test complete."
-echo "Try opening Font Book now to see if fonts appear."
-echo "If not, try restarting Font Book or logging out and back in."
+echo "4. Testing font recognition with available tools:"
+if command -v fc-list >/dev/null 2>&1; then
+    echo "  fontconfig available - checking font list:"
+    fc-list | grep -i atlassian || echo "    No Atlassian fonts found by fontconfig"
+else
+    echo "  fontconfig not available in current environment"
+fi
+
+echo ""
+echo "5. Checking if fonts can be opened:"
+for font in ~/Library/Fonts/Atlassian*.ttf; do
+    if [ -f "$font" ]; then
+        echo "  Testing: $(basename "$font")"
+        if file "$font" | grep -q "TrueType"; then
+            echo "    ✓ Valid TrueType font"
+        else
+            echo "    ✗ Invalid font file"
+        fi
+    fi
+done
+
+echo ""
+echo "=== Font Installation Status ==="
+echo "The fonts should be available to applications now."
+echo "If fonts still don't appear, try:"
+echo "1. Restart your application"
+echo "2. Run: sudo darwin-rebuild switch --flake .#styx" 
+echo "3. Clear font cache: atsutil databases -remove (requires sudo)"
+echo "4. Restart Font Book app"

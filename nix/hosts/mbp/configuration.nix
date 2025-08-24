@@ -61,6 +61,8 @@ in
     extra-platforms = x86_64-darwin aarch64-darwin
   '';
 
+  # Enable proper font directory management
+  fonts.enableFontDir = true;
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
     atlassian-fonts

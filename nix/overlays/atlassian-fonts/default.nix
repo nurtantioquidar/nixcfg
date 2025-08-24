@@ -6,10 +6,18 @@ stdenv.mkDerivation rec {
 
   src = ../../../assets/fonts;
 
+  dontUnpack = true;
+
   installPhase = ''
     runHook preInstall
     
-    install -Dm644 *.ttf -t $out/share/fonts/truetype/
+    # Install fonts in the root of share/fonts for better macOS recognition
+    mkdir -p $out/share/fonts
+    cp -v $src/*.ttf $out/share/fonts/
+    
+    # Also create the standard truetype directory structure
+    mkdir -p $out/share/fonts/truetype
+    cp -v $src/*.ttf $out/share/fonts/truetype/
     
     runHook postInstall
   '';
