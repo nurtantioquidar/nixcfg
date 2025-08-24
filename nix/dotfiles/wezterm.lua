@@ -7,7 +7,7 @@ local config = wezterm.config_builder()
 config.color_scheme = 'Tokyo Night'
 
 config.font = wezterm.font({ family = 'Atlassian Mono' })
-config.font_size = 14
+config.font_size = 13
 config.leader = { key = 'a', mods = 'CTRL', timeout_milliseconds = 1000 }
 config.keys = {
   -- ... add these new entries to your config.keys table
