@@ -3,6 +3,7 @@
 let
   username = "hades";
   mkImports = import ../../lib/mkImports.nix args;
+  atlassian-mono = pkgs.callPackage ../../custom_fonts/atlassian-mono/default.nix {};
 in
 {
   system.stateVersion = 5;
@@ -61,10 +62,8 @@ in
     extra-platforms = x86_64-darwin aarch64-darwin
   '';
 
-  # Enable proper font directory management
-  fonts.enableFontDir = true;
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
-    atlassian-fonts
+    atlassian-mono
   ];
 }
