@@ -3,7 +3,6 @@
 let
   username = "hades";
   mkImports = import ../../lib/mkImports.nix args;
-  atlassian-mono = pkgs.callPackage ../../custom_fonts/atlassian-mono/default.nix {};
 in
 {
   system.stateVersion = 5;
@@ -64,6 +63,6 @@ in
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
-    atlassian-mono
+    nerd-fonts.fira-code
   ];
 }

@@ -18,7 +18,6 @@
     # ./git.nix
     # ./zsh.nix
     ./fish.nix
-    ./fonts-working.nix  # Testing comprehensive font installation
     # ./ssh.nix
     # ./nvim.nix
     # ./tmux.nix
