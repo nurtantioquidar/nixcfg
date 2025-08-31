@@ -52,14 +52,14 @@ _:
       "1password"
       "zoom"
       "scroll-reverser"
-      "mos"
+      # "mos"
       "jordanbaird-ice"
       "claude"
-      "windsurf"
       "firefox"
       "gcloud-cli"
       "cursor"
       "orion"
+      "private-internet-access"
     ];
 
     # MAS apps managed by separate script (mas-install.sh) for better state management
