@@ -18,6 +18,7 @@
     # ./git.nix
     # ./zsh.nix
     ./fish.nix
+    ./bash.nix
     # ./ssh.nix
     # ./nvim.nix
     # ./tmux.nix
