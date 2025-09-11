@@ -34,7 +34,6 @@ _:
       "gh"
       "woff2"
       "uv"
-      "ngrok"
       "pnpm"
     ];
 
@@ -62,6 +61,7 @@ _:
       "cursor"
       "orion"
       "private-internet-access"
+      "ngrok"
     ];
 
     # MAS apps managed by separate script (mas-install.sh) for better state management
