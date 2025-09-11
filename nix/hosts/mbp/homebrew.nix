@@ -34,6 +34,8 @@ _:
       "gh"
       "woff2"
       "uv"
+      "ngrok"
+      "pnpm"
     ];
 
     casks = [
