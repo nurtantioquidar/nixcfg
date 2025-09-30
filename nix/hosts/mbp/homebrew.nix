@@ -59,9 +59,8 @@ _:
       "firefox"
       "gcloud-cli"
       "cursor"
-      "orion"
-      "private-internet-access"
       "ngrok"
+      "jetbrains-toolbox"
     ];
 
     # MAS apps managed by separate script (mas-install.sh) for better state management
