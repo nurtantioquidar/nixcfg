@@ -21,10 +21,15 @@ _:
       fish_add_path -m $HOME/.local/bin
 
       # SDKMAN! initialization
-      set -gx SDKMAN_DIR (brew --prefix sdkman-cli)/libexec
+      set -gx SDKMAN_DIR /opt/homebrew/opt/sdkman-cli/libexec
 
       function sdk
-          bash -c "source '$SDKMAN_DIR/bin/sdkman-init.sh' 2>/dev/null && sdk $argv"
+          bash -c "source '$SDKMAN_DIR/bin/sdkman-init.sh' && sdk $argv"
+      end
+
+      # Add SDKMAN candidates to PATH
+      if test -d $SDKMAN_DIR/candidates/java/current/bin
+          fish_add_path -m $SDKMAN_DIR/candidates/java/current/bin
       end
 
       function fish_prompt
