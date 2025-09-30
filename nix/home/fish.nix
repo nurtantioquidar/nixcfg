@@ -21,13 +21,25 @@ _:
       fish_add_path -m $HOME/.local/bin
 
       # SDKMAN! initialization
+      # Note: SDKMAN is installed via Homebrew, so we use the Homebrew path.
+      # Java versions are installed to $SDKMAN_DIR/candidates/java/<version>/
+      # The 'current' symlink points to the default version set via 'sdk default java <version>'
+      #
+      # Managing multiple Java versions:
+      #   sdk list java              - list available and installed versions
+      #   sdk install java <version> - install a new version
+      #   sdk use java <version>     - switch version for current shell only
+      #   sdk default java <version> - set default for all new shells (updates 'current' symlink)
+      #
+      # For per-project Java versions, create a .sdkmanrc file in project root:
+      #   echo "java=17.0.9-tem" > .sdkmanrc
       set -gx SDKMAN_DIR /opt/homebrew/opt/sdkman-cli/libexec
 
       function sdk
           bash -c "source '$SDKMAN_DIR/bin/sdkman-init.sh' && sdk $argv"
       end
 
-      # Add SDKMAN candidates to PATH
+      # Add SDKMAN's current Java version to PATH
       if test -d $SDKMAN_DIR/candidates/java/current/bin
           fish_add_path -m $SDKMAN_DIR/candidates/java/current/bin
       end
