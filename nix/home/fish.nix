@@ -20,6 +20,13 @@ _:
       fish_add_path -m $HOME/.nix-profile/bin
       fish_add_path -m $HOME/.local/bin
 
+      # SDKMAN! initialization
+      set -gx SDKMAN_DIR (brew --prefix sdkman-cli)/libexec
+
+      function sdk
+          bash -c "source '$SDKMAN_DIR/bin/sdkman-init.sh' 2>/dev/null && sdk $argv"
+      end
+
       function fish_prompt
           set -l level $SHLVL
           set -l usr (whoami)

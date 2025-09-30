@@ -15,6 +15,7 @@ _:
     enable = true;
 
     taps = [
+      "sdkman/tap"
     ];
 
     brews = [
@@ -35,6 +36,7 @@ _:
       "woff2"
       "uv"
       "pnpm"
+      "sdkman-cli"
     ];
 
     casks = [
