@@ -37,16 +37,17 @@ _:
       "uv"
       "pnpm"
       "sdkman-cli"
+      "tree"
     ];
 
     casks = [
-      "hammerspoon"
+      # "hammerspoon"
       "iina"
       "the-unarchiver"
       "slack"
       "pritunl"
       "wezterm"
-      "visual-studio-code"
+      # "visual-studio-code"
       "mullvad-vpn"
       "raycast"
       "spotify"
