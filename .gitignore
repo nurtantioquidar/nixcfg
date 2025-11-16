@@ -3,3 +3,6 @@
 .env*
 !.envrc
 result
+
+# Personal secrets (git user info, SSH keys, etc.)
+secrets.nix

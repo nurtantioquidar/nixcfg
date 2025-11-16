@@ -40,6 +40,7 @@ _:
       "sdkman-cli"
       "tree"
       "pipx"
+      # "starship" # Using home-manager instead for better Nix integration
     ];
 
     casks = [

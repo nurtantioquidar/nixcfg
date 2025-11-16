@@ -36,21 +36,6 @@ _:
       if test -d $SDKMAN_DIR/candidates/maven/current/bin
           fish_add_path -m $SDKMAN_DIR/candidates/maven/current/bin
       end
-
-      function fish_prompt
-          set -l level $SHLVL
-          set -l usr (whoami)
-          set -l branch ""
-          if command git rev-parse --is-inside-work-tree > /dev/null 2>&1
-              set branch (git symbolic-ref --short HEAD 2>/dev/null)
-              if test -n "$branch"
-                  set branch " ($branch)"
-              end
-          end
-          set -l pwd (prompt_pwd)
-          set -l prompt (string join "" (set_color cyan) $level ":" $usr (set_color magenta) $branch (set_color normal) " " $pwd " > ")
-          echo -n $prompt
-      end
     '';
 
     shellAliases = {

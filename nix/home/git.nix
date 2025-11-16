@@ -1,5 +1,18 @@
 { pkgs, ... }:
 
+let
+  # Load secrets from outside the flake directory
+  # This avoids the Git tracking requirement
+  # NOTE: Update this path if your home directory is different
+  secretsPath = /Users/hades/.config/nix-secrets/git-secrets.nix;
+  secrets = if builtins.pathExists secretsPath
+    then import secretsPath
+    else {
+      userName = "Your Name";
+      userEmail = "your.email@example.com";
+      sshSigningKey = "";
+    };
+in
 {
   home.packages = with pkgs; [
     gh
@@ -9,15 +22,24 @@
     enable = true;
     lfs.enable = true;
 
-    userName = builtins.getEnv "USER_NAME";
-    userEmail = builtins.getEnv "USER_EMAIL";
+    userName = secrets.userName;
+    userEmail = secrets.userEmail;
+
+    ignores = [
+      ".DS_Store"
+      "*.swp"
+      "*~"
+      ".idea/"
+      ".vscode/"
+      "*.iml"
+    ];
 
     extraConfig = {
+      # Git commit signing with 1Password
       gpg.format = "ssh";
       "gpg \"ssh\"".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
 
-      user.signingkey = builtins.getEnv "SSH_PUB_KEY";
-
+      user.signingkey = secrets.sshSigningKey;
       commit.gpgsign = true;
 
       init.defaultBranch = "main";
@@ -55,7 +77,6 @@
       };
 
       core = {
-        excludesfile = "~/.gitconfig";
         editor = "nvim";
         fscache = "falseb";
       };
