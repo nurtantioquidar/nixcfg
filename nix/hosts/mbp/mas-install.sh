@@ -7,10 +7,8 @@ set -e
 
 # Define MAS apps with their IDs and names
 declare -A MAS_APPS=(
-    ["441258766"]="Magnet"
     ["1320666476"]="Wipr"
     ["1662217862"]="Wipr 2"
-    ["1398373917"]="UpNote: notes, diary, journal"
     ["310633997"]="WhatsApp Messenger"
 )
 

@@ -32,12 +32,14 @@ _:
       "oci-cli"
       "pinentry-mac"
       "slackdump"
+      "git"
       "gh"
       "woff2"
       "uv"
       "pnpm"
       "sdkman-cli"
       "tree"
+      "pipx"
     ];
 
     casks = [
@@ -46,7 +48,6 @@ _:
       "the-unarchiver"
       "slack"
       "pritunl"
-      "wezterm"
       # "visual-studio-code"
       "mullvad-vpn"
       "raycast"
@@ -58,23 +59,16 @@ _:
       "scroll-reverser"
       # "mos"
       "jordanbaird-ice"
-      "claude"
-      "firefox"
+      "claude-code"
       "gcloud-cli"
       "cursor"
       "ngrok"
       "jetbrains-toolbox"
+      "rectangle"
+      "caffeine"
+      "whatsapp"
     ];
 
-    # MAS apps managed by separate script (mas-install.sh) for better state management
-    # Run: ./nix/hosts/mbp/mas-install.sh after darwin-rebuild
-    # masApps = {
-    #     "Magnet" = 441258766;
-    #     "Wipr" = 1320666476;
-    #     "Wipr 2" = 1662217862;
-    #     "UpNote: notes, diary, journal" = 1398373917;
-    #     "WhatsApp Messenger" = 310633997;
-    # };
     onActivation = {
       cleanup = "zap";
       autoUpdate = false;
