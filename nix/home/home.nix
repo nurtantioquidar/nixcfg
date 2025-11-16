@@ -35,7 +35,8 @@
     enableFishIntegration = true;
     settings = {
       add_newline = true;
-      command_timeout = 1000;
+      command_timeout = 500;
+      scan_timeout = 10;
 
       # Custom prompt format
       format = "$username$hostname$directory$git_branch$git_status$character";
@@ -61,6 +62,7 @@
 
       # Git status
       git_status = {
+        disabled = true;
         style = "bold bright-yellow";
         ahead = "⇡\${count}";
         behind = "⇣\${count}";

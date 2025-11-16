@@ -78,13 +78,22 @@ in
 
       core = {
         editor = "nvim";
-        fscache = "falseb";
+        fscache = true;
+        untrackedCache = true;
       };
 
       rebase = {
         autoSquash = true;
         autoStash = true;
         updateRefs = true;
+      };
+
+      gc = {
+        writeCommitGraph = true;
+      };
+
+      maintenance = {
+        auto = true;
       };
     };
   };
