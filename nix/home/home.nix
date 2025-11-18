@@ -30,6 +30,12 @@
 
   programs.direnv.enable = true;
 
+  # Ensure ~/.local/bin is on PATH for all processes (not just interactive shells)
+  # This fixes warnings from tools like `uv` that check PATH in non-interactive contexts
+  home.sessionVariables = {
+    PATH = "$HOME/.local/bin:$PATH";
+  };
+
   programs.starship = {
     enable = true;
     enableFishIntegration = true;
