@@ -32,6 +32,7 @@ in
       ".idea/"
       ".vscode/"
       "*.iml"
+      ".claude/"
     ];
 
     extraConfig = {
