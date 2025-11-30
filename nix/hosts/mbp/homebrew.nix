@@ -68,6 +68,7 @@ _:
       "rectangle"
       "caffeine"
       "whatsapp"
+      "expressvpn"
     ];
 
     onActivation = {
