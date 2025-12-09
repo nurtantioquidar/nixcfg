@@ -69,6 +69,8 @@ _:
       "caffeine"
       "whatsapp"
       "expressvpn"
+      "visual-studio-code"
+      "soundsource"
     ];
 
     onActivation = {
