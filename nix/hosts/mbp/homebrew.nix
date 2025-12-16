@@ -49,7 +49,6 @@ _:
       "the-unarchiver"
       "slack"
       "pritunl"
-      # "visual-studio-code"
       "mullvad-vpn"
       "raycast"
       "spotify"
@@ -71,6 +70,7 @@ _:
       "expressvpn"
       "visual-studio-code"
       "soundsource"
+      "ghostty"
     ];
 
     onActivation = {
