@@ -16,6 +16,7 @@ _:
 
     taps = [
       "sdkman/tap"
+      "oven-sh/bun"
     ];
 
     brews = [
@@ -41,6 +42,8 @@ _:
       "tree"
       "pipx"
       # "starship" # Using home-manager instead for better Nix integration
+      "bun"
+      "cloudflared"
     ];
 
     casks = [
@@ -59,6 +62,7 @@ _:
       "scroll-reverser"
       # "mos"
       "jordanbaird-ice"
+      "claude"
       "claude-code"
       "gcloud-cli"
       "cursor"
@@ -71,6 +75,9 @@ _:
       "visual-studio-code"
       "soundsource"
       "ghostty"
+      "orbstack"
+      "zed"
+      "firefox"
     ];
 
     onActivation = {
