@@ -15,7 +15,6 @@ _:
     enable = true;
 
     taps = [
-      "sdkman/tap"
       "oven-sh/bun"
     ];
 
@@ -38,7 +37,6 @@ _:
       "woff2"
       "uv"
       "pnpm"
-      "sdkman-cli"
       "tree"
       "pipx"
       # "starship" # Using home-manager instead for better Nix integration
@@ -65,7 +63,6 @@ _:
       "claude"
       "claude-code"
       "gcloud-cli"
-      "cursor"
       "ngrok"
       "jetbrains-toolbox"
       "rectangle"
@@ -78,6 +75,7 @@ _:
       "orbstack"
       "zed"
       "firefox"
+      "obsidian"
     ];
 
     onActivation = {

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   home.stateVersion = "25.05";
@@ -11,13 +11,15 @@
     jq
     ripgrep
     ngrok
+    unzip
+    zip
   ];
 
   imports = [
     # ./vscode.nix
     ./git.nix
-    # ./zsh.nix
-    ./fish.nix
+    ./zsh.nix
+    # ./fish.nix
     ./bash.nix
     # ./ssh.nix
     # ./nvim.nix
@@ -36,9 +38,16 @@
     PATH = "$HOME/.local/bin:$PATH";
   };
 
+  home.activation.installSdkman = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    if [ ! -d "$HOME/.sdkman" ]; then
+      export PATH="${pkgs.unzip}/bin:${pkgs.zip}/bin:${pkgs.curl}/bin:${pkgs.gnutar}/bin:${pkgs.gzip}/bin:$PATH"
+      $DRY_RUN_CMD ${pkgs.curl}/bin/curl -s "https://get.sdkman.io?rcupdate=false" | $DRY_RUN_CMD ${pkgs.bash}/bin/bash
+    fi
+  '';
+
   programs.starship = {
     enable = true;
-    enableFishIntegration = true;
+    enableZshIntegration = true;
     settings = {
       add_newline = true;
       command_timeout = 500;
