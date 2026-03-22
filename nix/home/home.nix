@@ -13,6 +13,10 @@
     ngrok
     unzip
     zip
+    go
+    gopls
+    delve
+    mockgen
   ];
 
   imports = [
