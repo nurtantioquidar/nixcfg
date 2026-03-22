@@ -54,7 +54,6 @@ _:
       "raycast"
       "spotify"
       "lens"
-      "google-cloud-sdk"
       "1password"
       "zoom"
       "scroll-reverser"
@@ -76,6 +75,7 @@ _:
       "zed"
       "firefox"
       "obsidian"
+      "codex"
     ];
 
     onActivation = {
