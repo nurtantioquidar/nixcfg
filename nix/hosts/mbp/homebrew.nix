@@ -60,7 +60,6 @@ _:
       # "mos"
       "jordanbaird-ice"
       "claude"
-      "claude-code"
       "gcloud-cli"
       "ngrok"
       "jetbrains-toolbox"
