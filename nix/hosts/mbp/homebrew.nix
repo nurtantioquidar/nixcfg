@@ -16,6 +16,7 @@ _:
 
     taps = [
       "oven-sh/bun"
+      "steipete/tap"
     ];
 
     brews = [
@@ -42,6 +43,7 @@ _:
       # "starship" # Using home-manager instead for better Nix integration
       "bun"
       "cloudflared"
+      "steipete/tap/oracle"
     ];
 
     casks = [
