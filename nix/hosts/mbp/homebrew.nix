@@ -77,6 +77,7 @@ _:
       # "firefox"
       "obsidian"
       "codex"
+      "brave-browser"
     ];
 
     onActivation = {
