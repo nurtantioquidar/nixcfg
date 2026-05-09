@@ -22,9 +22,6 @@ in
     enable = true;
     lfs.enable = true;
 
-    userName = secrets.userName;
-    userEmail = secrets.userEmail;
-
     ignores = [
       ".DS_Store"
       "*.swp"
@@ -35,12 +32,19 @@ in
       ".claude/"
     ];
 
-    extraConfig = {
+    settings = {
       # Git commit signing with 1Password
-      gpg.format = "ssh";
-      "gpg \"ssh\"".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+      user = {
+        name = secrets.userName;
+        email = secrets.userEmail;
+        signingkey = secrets.sshSigningKey;
+      };
 
-      user.signingkey = secrets.sshSigningKey;
+      gpg = {
+        format = "ssh";
+        "ssh".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+      };
+
       commit.gpgsign = true;
 
       init.defaultBranch = "main";
