@@ -26,6 +26,7 @@
     # ./fish.nix
     ./bash.nix
     ./claude-code.nix
+    ./node-packages.nix
     # ./ssh.nix
     # ./nvim.nix
     # ./tmux.nix
