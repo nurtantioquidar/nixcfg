@@ -190,6 +190,10 @@ CLI tools are usually better managed through Nix when possible. For example, Goo
 
 This config uses `homebrew.onActivation.cleanup = "zap"` so unmanaged Homebrew packages are pruned during activation. If cleanup refuses to uninstall a formula because an installed cask still depends on it, keep that formula in `homebrew.brews`; for example, `python@3.13` and `ripgrep` are listed because Homebrew reported them as live cask dependencies.
 
+### NPM Deprecation Warnings During Rebuild
+
+`nix/home/node-packages.nix` manages selected global npm packages under `~/.local`. The activation checks whether each package is already installed before running `npm install --global`, so transitive npm warnings should appear only when a package is missing and installation actually runs.
+
 ### Starship Looks Unchanged
 
 Open a new terminal, confirm the active shell is loading Home Manager output, and check that Starship is installed:

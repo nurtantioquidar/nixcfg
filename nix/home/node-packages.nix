@@ -23,6 +23,16 @@ in
     export npm_config_prefix="${npmPrefix}"
 
     $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "${npmPrefix}" "$HOME/.cache/npm"
-    $DRY_RUN_CMD ${nodejs}/bin/npm install --global --no-audit --no-fund --prefix "${npmPrefix}" ${packageArgs}
+
+    missing_packages=()
+    for package in ${packageArgs}; do
+      if ! ${nodejs}/bin/npm list --global --depth=0 --prefix "${npmPrefix}" "$package" >/dev/null 2>&1; then
+        missing_packages+=("$package")
+      fi
+    done
+
+    if [ "''${#missing_packages[@]}" -gt 0 ]; then
+      $DRY_RUN_CMD ${nodejs}/bin/npm install --global --no-audit --no-fund --prefix "${npmPrefix}" "''${missing_packages[@]}"
+    fi
   '';
 }
