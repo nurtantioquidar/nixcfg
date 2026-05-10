@@ -37,6 +37,10 @@ _:
       "woff2"
       "uv"
       "pnpm"
+      # Required by installed Homebrew casks; keep them listed so cleanup can zap
+      # unmanaged packages without trying to remove live cask dependencies.
+      "python@3.13"
+      "ripgrep"
       "tree"
       "pipx"
       # "starship" # Using home-manager instead for better Nix integration
@@ -60,12 +64,13 @@ _:
       # "mos"
       # "jordanbaird-ice"
       "claude"
-      "gcloud-cli"
       "ngrok"
       "jetbrains-toolbox"
       "rectangle"
       "caffeine"
-      "whatsapp"
+      # WhatsApp's vendor download endpoint has returned HTTP 500 during activation.
+      # Keep it out of nix-darwin activation so rebuilds are not blocked by that cask.
+      # "whatsapp"
       "expressvpn"
       "visual-studio-code"
       "soundsource"
@@ -80,7 +85,10 @@ _:
 
     onActivation = {
       cleanup = "zap";
-      autoUpdate = false;
+      autoUpdate = true;
+      extraEnv = {
+        HOMEBREW_NO_INSTALL_FROM_API = "1";
+      };
     };
   };
 }

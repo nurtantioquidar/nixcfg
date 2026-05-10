@@ -19,8 +19,12 @@ _:
       export PATH="$HOME/.local/bin:$PATH"
 
       # Google Cloud SDK
-      source "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc"
-      source "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc"
+      if [ -e "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc" ]; then
+        source "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc"
+      fi
+      if [ -e "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc" ]; then
+        source "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc"
+      fi
 
       export SDKMAN_DIR="$HOME/.sdkman"
       [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"

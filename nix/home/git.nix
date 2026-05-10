@@ -1,10 +1,13 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
   # Load secrets from outside the flake directory
   # This avoids the Git tracking requirement
   # NOTE: Update this path if your home directory is different
-  secretsPath = /Users/hades/.config/nix-secrets/git-secrets.nix;
+  secretsPath =
+    if pkgs.stdenv.isDarwin
+    then /Users/hades/.config/nix-secrets/git-secrets.nix
+    else /home/hades/.config/nix-secrets/git-secrets.nix;
   secrets =
     if builtins.pathExists secretsPath
     then import secretsPath
@@ -13,6 +16,8 @@ let
       userEmail = "your.email@example.com";
       sshSigningKey = "";
     };
+  hasSshSigningKey = secrets.sshSigningKey != "";
+  enableOnePasswordSigning = pkgs.stdenv.isDarwin && hasSshSigningKey;
 in
 {
   home.packages = with pkgs; [
@@ -33,74 +38,79 @@ in
       ".claude/"
     ];
 
-    settings = {
-      # Git commit signing with 1Password
-      user = {
-        name = secrets.userName;
-        email = secrets.userEmail;
-        signingkey = secrets.sshSigningKey;
-      };
+    settings = lib.mkMerge [
+      {
+        user = {
+          name = secrets.userName;
+          email = secrets.userEmail;
+        };
 
-      gpg = {
-        format = "ssh";
-        "ssh".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
-      };
+        init.defaultBranch = "main";
 
-      commit.gpgsign = true;
+        pull.rebase = true;
 
-      init.defaultBranch = "main";
+        push.autoSetupRemote = true;
 
-      pull.rebase = true;
+        column.ui = "auto";
 
-      push.autoSetupRemote = true;
+        branch.sort = "-committerdate";
 
-      column.ui = "auto";
+        tag.sort = "version:refname";
 
-      branch.sort = "-committerdate";
+        diff = {
+          algorithm = "histogram";
+          colorMoved = "plain";
+          mnemonicPrefix = true;
+          renames = true;
+        };
 
-      tag.sort = "version:refname";
+        fetch = {
+          prune = true;
+          pruneTags = true;
+          all = true;
+        };
 
-      diff = {
-        algorithm = "histogram";
-        colorMoved = "plain";
-        mnemonicPrefix = true;
-        renames = true;
-      };
+        help.autocorrect = "prompt";
 
-      fetch = {
-        prune = true;
-        pruneTags = true;
-        all = true;
-      };
+        commit.verbose = true;
 
-      help.autocorrect = "prompt";
+        rerere = {
+          enabled = true;
+          autoupdate = true;
+        };
 
-      commit.verbose = true;
+        core = {
+          editor = "nvim";
+          fscache = true;
+          untrackedCache = true;
+        };
 
-      rerere = {
-        enabled = true;
-        autoupdate = true;
-      };
+        rebase = {
+          autoSquash = true;
+          autoStash = true;
+          updateRefs = true;
+        };
 
-      core = {
-        editor = "nvim";
-        fscache = true;
-        untrackedCache = true;
-      };
+        gc = {
+          writeCommitGraph = true;
+        };
 
-      rebase = {
-        autoSquash = true;
-        autoStash = true;
-        updateRefs = true;
-      };
+        maintenance = {
+          auto = true;
+        };
+      }
 
-      gc = {
-        writeCommitGraph = true;
-      };
+      (lib.mkIf enableOnePasswordSigning {
+        # Git commit signing with 1Password is macOS-only in this profile.
+        user.signingkey = secrets.sshSigningKey;
 
-      maintenance = {
-        auto = true;
-      };
-    };
+        gpg = {
+          format = "ssh";
+          "ssh".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+        };
+
+        commit.gpgsign = true;
+      })
+    ];
   };
 }

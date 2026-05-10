@@ -5,7 +5,7 @@
     # ./vscode.nix
     ./git.nix
     ./zsh.nix
-    # ./fish.nix
+    ./fish.nix
     ./bash.nix
     ./claude-code.nix
     ./node-packages.nix
@@ -31,6 +31,7 @@
       gopls
       delve
       mockgen
+      google-cloud-sdk
     ];
 
     # Ensure ~/.local/bin is on PATH for all processes (not just interactive shells)
@@ -56,6 +57,7 @@
 
     starship = {
       enable = true;
+      enableFishIntegration = true;
       enableZshIntegration = true;
       settings = {
         add_newline = true;

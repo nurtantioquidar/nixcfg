@@ -1,4 +1,4 @@
-_:
+{ pkgs, ... }:
 {
   programs.fish = {
     enable = true;
@@ -11,7 +11,9 @@ _:
       # Set GPG_TTY using fish command substitution.
       set -x GPG_TTY (tty)
 
-      ssh-add --apple-load-keychain 2> /dev/null
+      if command -q ssh-add
+          ssh-add --apple-load-keychain 2> /dev/null
+      end
 
       fish_add_path -amP /usr/bin
       fish_add_path -amP /opt/homebrew/bin
@@ -21,10 +23,12 @@ _:
       fish_add_path -m $HOME/.local/bin
 
       # SDKMAN! initialization
-      set -gx SDKMAN_DIR /opt/homebrew/opt/sdkman-cli/libexec
+      set -gx SDKMAN_DIR $HOME/.sdkman
 
-      function sdk
-          bash -c "source '$SDKMAN_DIR/bin/sdkman-init.sh' && sdk $argv"
+      if test -s $SDKMAN_DIR/bin/sdkman-init.sh
+          function sdk
+              ${pkgs.bash}/bin/bash -c "source '$SDKMAN_DIR/bin/sdkman-init.sh' && sdk $argv"
+          end
       end
 
       # Add SDKMAN's current Java version to PATH

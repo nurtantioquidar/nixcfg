@@ -14,6 +14,12 @@ Darwin is the primary path in this guide. WSL uses the same Home Manager profile
 - Home Manager through this flake.
 - 1Password for Git SSH signing on macOS, if signed commits are required.
 
+If the current shell does not have flakes enabled yet, bootstrap or verify commands can be run with explicit feature flags:
+
+```bash
+nix --extra-experimental-features nix-command --extra-experimental-features flakes flake check --no-build
+```
+
 ## Rebuild Commands
 
 From this repository:
@@ -27,11 +33,12 @@ With flakes, local changes must be visible to Git before a rebuild can read them
 
 ## Shell And Prompt
 
-Home Manager imports `nix/home/zsh.nix` and does not currently import `nix/home/fish.nix`. The active Starship prompt configuration lives in `nix/home/home.nix`:
+The system login shell is Fish on both hosts, and Home Manager imports both `nix/home/fish.nix` and `nix/home/zsh.nix`. The active Starship prompt configuration lives in `nix/home/home.nix` and enables integration for both shells:
 
 ```nix
 programs.starship = {
   enable = true;
+  enableFishIntegration = true;
   enableZshIntegration = true;
   settings = {
     add_newline = true;
@@ -46,9 +53,11 @@ programs.starship = {
 
 `git_status.disabled = true` means the prompt currently shows the Git branch but not dirty, staged, ahead, or behind status. Remove or set that option to `false` if prompt Git status should be restored.
 
+Fish is the shell that should receive day-to-day PATH and SDKMAN behavior. `nix/home/fish.nix` points SDKMAN at `$HOME/.sdkman`, matching the Home Manager activation that installs SDKMAN there.
+
 ## Git Configuration
 
-Git is managed by `nix/home/git.nix`. It installs `gh`, enables Git LFS, configures global ignores, and uses `programs.git.settings` for Git options:
+Git is managed by `nix/home/git.nix`. It installs `gh`, enables Git LFS, configures global ignores, and uses `programs.git.settings` for Git options. 1Password signing is enabled only on Darwin when `sshSigningKey` is non-empty:
 
 ```nix
 programs.git = {
@@ -69,15 +78,8 @@ programs.git = {
     user = {
       name = secrets.userName;
       email = secrets.userEmail;
-      signingkey = secrets.sshSigningKey;
     };
 
-    gpg = {
-      format = "ssh";
-      "ssh".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
-    };
-
-    commit.gpgsign = true;
     init.defaultBranch = "main";
     pull.rebase = true;
     push.autoSetupRemote = true;
@@ -85,14 +87,15 @@ programs.git = {
 };
 ```
 
-The fallback values in `git.nix` are placeholders. Configure the external secrets file before expecting Git identity or signing to be correct.
+The fallback values in `git.nix` are placeholders. Configure the external secrets file before expecting Git identity to be correct. On macOS, Git commit signing is configured only when the external secrets file contains `sshSigningKey`.
 
 ## Secrets
 
-`nix/home/git.nix` reads secrets from this absolute path:
+`nix/home/git.nix` reads secrets from an absolute path outside the flake:
 
 ```text
-/Users/hades/.config/nix-secrets/git-secrets.nix
+macOS: /Users/hades/.config/nix-secrets/git-secrets.nix
+WSL:   /home/hades/.config/nix-secrets/git-secrets.nix
 ```
 
 Create it from the template:
@@ -119,11 +122,13 @@ To check that Nix can read the file:
 
 ```bash
 nix-instantiate --eval -E 'import /Users/hades/.config/nix-secrets/git-secrets.nix'
+# WSL:
+nix-instantiate --eval -E 'import /home/hades/.config/nix-secrets/git-secrets.nix'
 ```
 
 ## 1Password Git Signing
 
-The current Git signing setup is:
+The macOS Git signing setup is enabled only when `sshSigningKey` is configured:
 
 - `gpg.format = "ssh"`
 - `gpg.ssh.program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"`
@@ -144,7 +149,7 @@ git config --get commit.gpgsign
 ./verify-1password-signing.sh
 ```
 
-The verification script creates a temporary repository under `/tmp` and attempts a signed test commit there, so it does not require modifying repository files.
+The verification script creates a temporary repository with `mktemp`, attempts a signed test commit there, and cleans it up automatically, so it does not require modifying repository files.
 
 ## SSH Agent Configuration
 
@@ -171,9 +176,23 @@ sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 
 ## Troubleshooting
 
+### Homebrew Cask API Fails During Rebuild
+
+`nix/hosts/mbp/homebrew.nix` lets Homebrew update during activation and sets `HOMEBREW_NO_INSTALL_FROM_API=1` for `brew bundle`. This avoids failures in Homebrew's cask API loader, such as `undefined method 'to_sym' for nil`, while still letting nix-darwin manage the Brewfile.
+
+### A Cask Vendor Download Fails
+
+If one cask download returns a vendor-side HTTP error, `brew bundle` fails the whole activation. Keep that app out of `homebrew.casks` until the vendor URL is healthy again, then install it manually or re-enable it in `nix/hosts/mbp/homebrew.nix`.
+
+CLI tools are usually better managed through Nix when possible. For example, Google Cloud SDK is installed as `google-cloud-sdk` through Home Manager instead of the Homebrew `gcloud-cli` cask, avoiding Caskroom upgrade state failures during activation.
+
+### Homebrew Cleanup Refuses To Uninstall Dependencies
+
+This config uses `homebrew.onActivation.cleanup = "zap"` so unmanaged Homebrew packages are pruned during activation. If cleanup refuses to uninstall a formula because an installed cask still depends on it, keep that formula in `homebrew.brews`; for example, `python@3.13` and `ripgrep` are listed because Homebrew reported them as live cask dependencies.
+
 ### Starship Looks Unchanged
 
-Open a new terminal, confirm Zsh is loading Home Manager output, and check that Starship is installed:
+Open a new terminal, confirm the active shell is loading Home Manager output, and check that Starship is installed:
 
 ```bash
 which starship
@@ -189,7 +208,7 @@ ls -la ~/.config/nix-secrets/git-secrets.nix
 nix-instantiate --eval -E 'import /Users/hades/.config/nix-secrets/git-secrets.nix'
 ```
 
-Then stage or commit Nix file changes and rebuild `#styx`.
+Then stage or commit Nix file changes and rebuild the relevant host.
 
 ### Commits Are Not Signed
 
@@ -202,7 +221,17 @@ git config --get user.signingkey
 git config --get commit.gpgsign
 ```
 
-If any value is missing, rebuild the flake and confirm the secrets file contains `sshSigningKey`.
+If these values are missing on macOS, rebuild the flake and confirm the secrets file contains `sshSigningKey`. On WSL, the 1Password signing values are intentionally omitted.
+
+### Flake Commands Fail Before Rebuild
+
+If `nix flake ...` fails with `experimental Nix feature 'nix-command' is disabled`, run the command with explicit feature flags:
+
+```bash
+nix --extra-experimental-features nix-command --extra-experimental-features flakes flake check --no-build
+```
+
+On the Darwin host, this flake currently sets `nix.enable = false`, so nix-darwin is not the component managing `/etc/nix/nix.conf`. Enable `nix-command` and `flakes` in the external Nix installation, or keep passing the explicit feature flags.
 
 ### GitHub Shows Unverified
 
