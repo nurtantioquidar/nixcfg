@@ -1,8 +1,7 @@
-{
-  lib,
-  stdenv,
-  callPackage,
-  unrarSupport ? false
+{ lib
+, stdenv
+, callPackage
+, unrarSupport ? false
 }:
 
 let

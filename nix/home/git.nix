@@ -5,7 +5,8 @@ let
   # This avoids the Git tracking requirement
   # NOTE: Update this path if your home directory is different
   secretsPath = /Users/hades/.config/nix-secrets/git-secrets.nix;
-  secrets = if builtins.pathExists secretsPath
+  secrets =
+    if builtins.pathExists secretsPath
     then import secretsPath
     else {
       userName = "Your Name";

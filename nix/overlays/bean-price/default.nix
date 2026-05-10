@@ -1,9 +1,9 @@
-{
-  lib,
-  buildPythonPackage,
-  python3Packages,
-  fetchPypi,
-  isPy3k,
+{ lib
+, buildPythonPackage
+, python3Packages
+, fetchPypi
+, isPy3k
+,
 }:
 
 buildPythonPackage rec {
@@ -14,7 +14,7 @@ buildPythonPackage rec {
   disabled = !isPy3k;
 
   src = fetchPypi {
-    inherit pname version;        
+    inherit pname version;
     hash = "sha256-0/W1q25z6xNjhb7mZFpJUZ6TVNNA1BK341gOxlpOGVc=";
   };
 

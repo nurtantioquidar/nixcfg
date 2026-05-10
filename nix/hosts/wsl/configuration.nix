@@ -10,10 +10,7 @@ in
     enable = true;
     defaultUser = username;
     startMenuLaunchers = true;
-    
-    # Enable native systemd support
-    nativeSystemd = true;
-    
+
     # WSL interoperability settings
     interop.register = true;
     interop.includePath = false;
@@ -21,7 +18,7 @@ in
 
   imports = mkImports {
     inherit username;
-    
+
     imports = [
       ./packages.nix
     ];
@@ -29,7 +26,7 @@ in
 
   # System configuration
   system.stateVersion = "24.05";
-  
+
   # Enable flakes and new nix command
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.settings.auto-optimise-store = true;
@@ -39,7 +36,7 @@ in
     isNormalUser = true;
     home = "/home/${username}";
     shell = pkgs.fish;
-    extraGroups = [ "wheel" "docker" "networkmanager" ];
+    extraGroups = [ "wheel" "docker" ];
   };
 
   # Enable sudo without password for wheel group (common in WSL)
@@ -69,8 +66,11 @@ in
   virtualisation.docker.enable = true;
 
   # Network configuration
-  networking.hostName = "wsl-nixos";
-  networking.networkmanager.enable = true;
+  networking = {
+    hostName = "wsl-nixos";
+    networkmanager.enable = false;
+    resolvconf.enable = false;
+  };
 
   # Time zone (adjust as needed)
   time.timeZone = "Asia/Singapore";

@@ -5,4 +5,5 @@
 result
 
 # Personal secrets (git user info, SSH keys, etc.)
-secrets.nixtest
+secrets.nix
+git-secrets.nix

@@ -1,6 +1,6 @@
 # Secrets Setup
 
-Git configuration requires personal information that shouldn't be committed to the repository.
+Git configuration requires personal information that shouldn't be committed to the repository. `nix/home/git.nix` currently reads those values from `/Users/hades/.config/nix-secrets/git-secrets.nix`.
 
 ## Setup Instructions
 
@@ -27,9 +27,9 @@ Git configuration requires personal information that shouldn't be committed to t
 
 4. Rebuild:
    ```bash
-   darwin-rebuild switch --flake ~/.config/nix
+   sudo darwin-rebuild switch --flake ~/.config/nix#styx
    ```
 
 ## Why outside the flake?
 
-Nix flakes only see files tracked by Git. Since secrets shouldn't be committed, we store them in `~/.config/nix-secrets/` which is outside the flake directory.
+Nix flakes only see files tracked by Git. Since secrets shouldn't be committed, we store them in `~/.config/nix-secrets/` which is outside the flake directory. If your home directory changes, update `secretsPath` in `nix/home/git.nix` to the new absolute path.

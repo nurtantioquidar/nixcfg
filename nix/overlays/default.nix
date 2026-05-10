@@ -17,9 +17,9 @@ let
   };
 in
 {
-  pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [pythonPackageExtensionsOverrides];
+  pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [ pythonPackageExtensionsOverrides ];
 
   calibre = callPackage ./calibre { };
-  
+
   atlassian-fonts = callPackage ./atlassian-fonts { };
 }

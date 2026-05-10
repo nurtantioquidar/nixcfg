@@ -1,36 +1,36 @@
-{
-  pname,
-  version,
-  meta,
-  cmake,
-  fetchpatch,
-  ffmpeg,
-  fontconfig,
-  hunspell,
-  hyphen,
-  icu,
-  imagemagick,
-  libjpeg,
-  libmtp,
-  libpng,
-  libstemmer,
-  libuchardet,
-  libusb1,
-  libwebp,
-  optipng,
-  piper-tts,
-  pkg-config,
-  podofo,
-  poppler_utils,
-  python3Packages,
-  qt6,
-  speechd-minimal,
-  sqlite,
-  xdg-utils,
-  wrapGAppsHook3,
-  popplerSupport ? true,
-  speechSupport ? true,
-  unrarSupport ? false,
+{ pname
+, version
+, meta
+, cmake
+, fetchpatch
+, ffmpeg
+, fontconfig
+, hunspell
+, hyphen
+, icu
+, imagemagick
+, libjpeg
+, libmtp
+, libpng
+, libstemmer
+, libuchardet
+, libusb1
+, libwebp
+, optipng
+, piper-tts
+, pkg-config
+, podofo
+, poppler_utils
+, python3Packages
+, qt6
+, speechd-minimal
+, sqlite
+, xdg-utils
+, wrapGAppsHook3
+, popplerSupport ? true
+, speechSupport ? true
+, unrarSupport ? false
+,
 }:
 
 {
@@ -95,42 +95,42 @@
     sqlite
     (python3Packages.python.withPackages (
       ps:
-      with ps;
-      [
-        (apsw.overrideAttrs (_oldAttrs: {
-          setupPyBuildFlags = [ "--enable=load_extension" ];
-        }))
-        beautifulsoup4
-        css-parser
-        cssselect
-        python-dateutil
-        dnspython
-        faust-cchardet
-        feedparser
-        html2text
-        html5-parser
-        lxml
-        markdown
-        mechanize
-        msgpack
-        netifaces
-        pillow
-        pychm
-        pykakasi
-        pyqt-builder
-        pyqt6
-        python
-        regex
-        sip
-        setuptools
-        zeroconf
-        jeepney
-        pycryptodome
-        xxhash
-        # the following are distributed with calibre, but we use upstream instead
-        odfpy
-      ]
-      ++
+        with ps;
+        [
+          (apsw.overrideAttrs (_oldAttrs: {
+            setupPyBuildFlags = [ "--enable=load_extension" ];
+          }))
+          beautifulsoup4
+          css-parser
+          cssselect
+          python-dateutil
+          dnspython
+          faust-cchardet
+          feedparser
+          html2text
+          html5-parser
+          lxml
+          markdown
+          mechanize
+          msgpack
+          netifaces
+          pillow
+          pychm
+          pykakasi
+          pyqt-builder
+          pyqt6
+          python
+          regex
+          sip
+          setuptools
+          zeroconf
+          jeepney
+          pycryptodome
+          xxhash
+          # the following are distributed with calibre, but we use upstream instead
+          odfpy
+        ]
+        ++
         lib.optionals (lib.lists.any (p: p == stdenv.hostPlatform.system) pyqt6-webengine.meta.platforms)
           [
             # much of calibre's functionality is usable without a web
@@ -138,7 +138,7 @@
             # does not support by simply omitting qtwebengine.
             pyqt6-webengine
           ]
-      ++ lib.optional unrarSupport unrardll
+        ++ lib.optional unrarSupport unrardll
     ))
     xdg-utils
   ] ++ lib.optional speechSupport speechd-minimal;
