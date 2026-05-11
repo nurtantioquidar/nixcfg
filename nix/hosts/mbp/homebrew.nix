@@ -1,4 +1,4 @@
-_:
+{ inputs, ... }:
 
 {
   nix-homebrew = {
@@ -9,12 +9,17 @@ _:
     user = "hades";
 
     autoMigrate = true;
+
+    taps = {
+      "homebrew/homebrew-cask" = inputs.homebrew-cask;
+    };
   };
 
   homebrew = {
     enable = true;
 
     taps = [
+      "homebrew/cask"
       "oven-sh/bun"
     ];
 
@@ -81,6 +86,7 @@ _:
       "obsidian"
       "codex"
       "brave-browser"
+      "chatgpt"
     ];
 
     onActivation = {

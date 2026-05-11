@@ -178,7 +178,28 @@ sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 
 ### Homebrew Cask API Fails During Rebuild
 
-`nix/hosts/mbp/homebrew.nix` lets Homebrew update during activation and sets `HOMEBREW_NO_INSTALL_FROM_API=1` for `brew bundle`. This avoids failures in Homebrew's cask API loader, such as `undefined method 'to_sym' for nil`, while still letting nix-darwin manage the Brewfile.
+`nix/hosts/mbp/homebrew.nix` lets Homebrew update during activation but runs `brew bundle` with `HOMEBREW_NO_INSTALL_FROM_API=1`. This avoids failures in Homebrew's cask API loader, such as:
+
+```text
+Error: undefined method 'to_sym' for nil
+```
+
+Disabling the API means Homebrew must resolve casks from a local tap checkout instead of the JSON API. If `homebrew/homebrew-cask` is not available locally, newer casks can fail with a misleading formula error:
+
+```text
+Error: No available formula with the name "chatgpt".
+```
+
+To cover both cases, this repo pins `github:homebrew/homebrew-cask` as the `homebrew-cask` flake input and exposes it through `nix-homebrew.taps."homebrew/homebrew-cask"`. Keep `homebrew/cask` in `homebrew.taps` too, so nix-darwin's generated Brewfile treats that tap as managed during `brew bundle --cleanup`.
+
+When adding a new cask that exists in Homebrew's API but fails during activation, check both paths:
+
+```bash
+brew info --cask <name>
+HOMEBREW_NO_INSTALL_FROM_API=1 brew info --cask <name>
+```
+
+The first command tests API-backed resolution. The second command tests the same no-API path used by `darwin-rebuild`.
 
 ### A Cask Vendor Download Fails
 
