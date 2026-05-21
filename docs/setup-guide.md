@@ -25,11 +25,19 @@ nix --extra-experimental-features nix-command --extra-experimental-features flak
 From this repository:
 
 ```bash
-sudo darwin-rebuild switch --flake ~/.config/nix#styx
+sudo darwin-rebuild switch --flake /Users/hades/.config/nix#styx --impure
 sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 ```
 
+Select the Darwin output explicitly with `#styx`. Do not rely on hostname inference; this Mac may report a hostname that does not match the flake output name.
+
 With flakes, local changes must be visible to Git before a rebuild can read them. Stage or commit changed files first when a rebuild says a path is missing from the source tree.
+
+## Documentation Conventions
+
+Markdown documentation filenames should use lower kebab case, such as `docs/setup-guide.md` and `docs/secrets-setup.md`.
+
+`AGENTS.md` is the only uppercase filename exception.
 
 ## Shell And Prompt
 
@@ -97,6 +105,8 @@ The fallback values in `git.nix` are placeholders. Configure the external secret
 macOS: /Users/hades/.config/nix-secrets/git-secrets.nix
 WSL:   /home/hades/.config/nix-secrets/git-secrets.nix
 ```
+
+See `docs/secrets-setup.md` for the focused setup flow.
 
 Create it from the template:
 
@@ -182,6 +192,7 @@ sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 
 ```text
 Error: undefined method 'to_sym' for nil
+Error: Cask 'codex' definition is invalid: 'generate_completions_from_executable' does not support shell(s): bash, zsh, fish
 ```
 
 Disabling the API means Homebrew must resolve casks from a local tap checkout instead of the JSON API. If `homebrew/homebrew-cask` is not available locally, newer casks can fail with a misleading formula error:
@@ -200,6 +211,13 @@ HOMEBREW_NO_INSTALL_FROM_API=1 brew info --cask <name>
 ```
 
 The first command tests API-backed resolution. The second command tests the same no-API path used by `darwin-rebuild`.
+
+If a newer cask uses DSL that the pinned Homebrew source cannot parse, update `nix-homebrew` and `homebrew-cask` together so the Homebrew loader and cask tap stay compatible:
+
+```bash
+nix --extra-experimental-features nix-command --extra-experimental-features flakes flake update nix-homebrew homebrew-cask
+sudo darwin-rebuild switch --flake /Users/hades/.config/nix#styx --impure
+```
 
 ### A Cask Vendor Download Fails
 
