@@ -13,6 +13,7 @@ This repository manages personal Nix configuration for macOS and WSL.
 
 - Prefer the existing Nix module layout over introducing new structure.
 - Keep host-specific changes under `nix/hosts/mbp` or `nix/hosts/wsl`.
+- Keep host-specific helper scripts under `nix/hosts/<host>/scripts`.
 - Keep shared user packages, shells, Git, prompt, and dotfile behavior under `nix/home`.
 - Keep local secrets outside this flake. The expected external secrets path is documented in `docs/setup-guide.md`.
 - Do not mutate Nix store paths or Nix-managed Homebrew tap symlinks directly. Change flake inputs or Nix modules instead.

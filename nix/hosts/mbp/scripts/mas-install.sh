@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Smart MAS installer - only installs if not already present
-# Usage: ./mas-install.sh
+# Usage: nix/hosts/mbp/scripts/mas-install.sh
 
 set -e
 

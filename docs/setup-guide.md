@@ -156,7 +156,7 @@ git config --get gpg.format
 git config --get gpg.ssh.program
 git config --get user.signingkey
 git config --get commit.gpgsign
-./verify-1password-signing.sh
+nix/hosts/mbp/scripts/verify-1password-signing.sh
 ```
 
 The verification script creates a temporary repository with `mktemp`, attempts a signed test commit there, and cleans it up automatically, so it does not require modifying repository files.
