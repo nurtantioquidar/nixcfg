@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   # Load secrets from outside the flake directory
@@ -18,11 +18,16 @@ let
     };
   hasSshSigningKey = secrets.sshSigningKey != "";
   enableOnePasswordSigning = pkgs.stdenv.isDarwin && hasSshSigningKey;
+  allowedSignersPath = "${config.home.homeDirectory}/.config/git/allowed_signers";
 in
 {
   home.packages = with pkgs; [
     gh
   ];
+
+  home.file.".config/git/allowed_signers" = lib.mkIf enableOnePasswordSigning {
+    text = "${secrets.userEmail} ${secrets.sshSigningKey}\n";
+  };
 
   programs.git = {
     enable = true;
@@ -106,7 +111,10 @@ in
 
         gpg = {
           format = "ssh";
-          "ssh".program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+          "ssh" = {
+            allowedSignersFile = allowedSignersPath;
+            program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+          };
         };
 
         commit.gpgsign = true;

@@ -16,6 +16,7 @@ This repository manages personal Nix configuration for macOS and WSL.
 - Keep host-specific helper scripts under `nix/hosts/<host>/scripts`.
 - Keep shared user packages, shells, Git, prompt, and dotfile behavior under `nix/home`.
 - Keep local secrets outside this flake. The expected external secrets path is documented in `docs/setup-guide.md`.
+- Git SSH signing verification is managed through Home Manager. `nix/home/git.nix` writes `~/.config/git/allowed_signers` from the external `userEmail` and `sshSigningKey` values when 1Password signing is enabled.
 - Do not mutate Nix store paths or Nix-managed Homebrew tap symlinks directly. Change flake inputs or Nix modules instead.
 - Use `rg` for repository search.
 - Use `nixpkgs-fmt` for Nix formatting when editing Nix files.

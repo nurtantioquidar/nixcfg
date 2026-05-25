@@ -31,12 +31,23 @@ echo ""
 echo "3. Checking Git configuration..."
 echo "   GPG format: $(git config --get gpg.format || echo 'NOT SET')"
 echo "   GPG SSH program: $(git config --get gpg.ssh.program || echo 'NOT SET')"
+echo "   Allowed signers: $(git config --get gpg.ssh.allowedSignersFile || echo 'NOT SET')"
 echo "   Signing key: $(git config --get user.signingkey || echo 'NOT SET')"
 echo "   Auto-sign commits: $(git config --get commit.gpgsign || echo 'NOT SET')"
 echo ""
 
+# Check local signature verification file
+echo "4. Checking allowed signers file..."
+allowed_signers_file="$(git config --get gpg.ssh.allowedSignersFile || true)"
+if [ -n "$allowed_signers_file" ] && [ -f "$allowed_signers_file" ]; then
+    echo "   OK: Found $allowed_signers_file"
+else
+    echo "   MISSING: gpg.ssh.allowedSignersFile is not configured or does not exist"
+fi
+echo ""
+
 # Check if op-ssh-sign exists
-echo "4. Checking 1Password SSH signing binary..."
+echo "5. Checking 1Password SSH signing binary..."
 if [ -f "/Applications/1Password.app/Contents/MacOS/op-ssh-sign" ]; then
     echo "   OK: Found /Applications/1Password.app/Contents/MacOS/op-ssh-sign"
 else
@@ -45,10 +56,8 @@ fi
 echo ""
 
 # Test signing
-echo "5. Testing commit signing..."
+echo "6. Testing commit signing..."
 git -C "$tmpdir" init
-git -C "$tmpdir" config user.name "Test User"
-git -C "$tmpdir" config user.email "test@example.com"
 printf 'test\n' > "$tmpdir/test.txt"
 git -C "$tmpdir" add test.txt
 if git -C "$tmpdir" commit -m "Test signed commit" 2>&1; then

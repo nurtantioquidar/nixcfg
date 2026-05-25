@@ -72,6 +72,7 @@ Run these commands from the repository root unless noted otherwise.
    git config --get user.email
    git config --get gpg.format
    git config --get gpg.ssh.program
+   git config --get gpg.ssh.allowedSignersFile
    git config --get user.signingkey
    git config --get commit.gpgsign
    ```
@@ -84,6 +85,6 @@ If the username or home directory changes, update `secretsPath` in `nix/home/git
 
 ## 1Password Signing
 
-On macOS, 1Password commit signing is enabled only when `sshSigningKey` is non-empty. On WSL, the 1Password signing settings are intentionally omitted.
+On macOS, 1Password commit signing is enabled only when `sshSigningKey` is non-empty. Home Manager also writes `~/.config/git/allowed_signers` from `userEmail` and `sshSigningKey` so local commands such as `git log --show-signature` can verify SSH-signed commits. On WSL, the 1Password signing settings are intentionally omitted.
 
 For GitHub verification, add the same public key to GitHub as a signing key, not only as an authentication key. The commit email must also match an email on the GitHub account.
