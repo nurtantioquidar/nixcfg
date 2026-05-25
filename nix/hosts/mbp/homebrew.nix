@@ -12,6 +12,7 @@
 
     taps = {
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
+      "manaflow-ai/homebrew-cmux" = inputs.homebrew-cmux;
     };
   };
 
@@ -20,6 +21,7 @@
 
     taps = [
       "homebrew/cask"
+      "manaflow-ai/cmux"
       "oven-sh/bun"
     ];
 
@@ -87,6 +89,7 @@
       "codex"
       "brave-browser"
       "chatgpt"
+      "cmux"
     ];
 
     onActivation = {

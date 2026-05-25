@@ -203,6 +203,8 @@ Error: No available formula with the name "chatgpt".
 
 To cover both cases, this repo pins `github:homebrew/homebrew-cask` as the `homebrew-cask` flake input and exposes it through `nix-homebrew.taps."homebrew/homebrew-cask"`. Keep `homebrew/cask` in `homebrew.taps` too, so nix-darwin's generated Brewfile treats that tap as managed during `brew bundle --cleanup`.
 
+Third-party taps that provide casks follow the same split. For example, cmux uses the Brewfile tap alias `manaflow-ai/cmux`, while `nix-homebrew.taps."manaflow-ai/homebrew-cmux"` points at the pinned `git+https://github.com/manaflow-ai/homebrew-cmux.git` flake input.
+
 When adding a new cask that exists in Homebrew's API but fails during activation, check both paths:
 
 ```bash

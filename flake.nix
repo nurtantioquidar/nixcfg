@@ -19,6 +19,11 @@
       flake = false;
     };
 
+    homebrew-cmux = {
+      url = "git+https://github.com/manaflow-ai/homebrew-cmux.git";
+      flake = false;
+    };
+
     nixos-wsl.url = "github:nix-community/NixOS-WSL";
     nixos-wsl.inputs.nixpkgs.follows = "nixpkgs";
 

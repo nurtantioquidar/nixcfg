@@ -87,6 +87,22 @@
         "type": "github"
       }
     },
+    "homebrew-cmux": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1779541438,
+        "narHash": "sha256-K4P8eb9KIx5LvizFYGfhoWK1GXVpeivfEnuyt//Q7XU=",
+        "ref": "refs/heads/main",
+        "rev": "9ec27943e10baa0e2594fd971412be436f1fafb2",
+        "revCount": 42,
+        "type": "git",
+        "url": "https://github.com/manaflow-ai/homebrew-cmux.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://github.com/manaflow-ai/homebrew-cmux.git"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -167,6 +183,7 @@
         "flake-utils": "flake-utils",
         "home-manager": "home-manager",
         "homebrew-cask": "homebrew-cask",
+        "homebrew-cmux": "homebrew-cmux",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixos-wsl": "nixos-wsl",

@@ -49,6 +49,7 @@ Homebrew is managed through `nix-homebrew` and `nix/hosts/mbp/homebrew.nix`.
 
 - Keep `homebrew/cask` in `homebrew.taps`.
 - Keep `inputs.homebrew-cask` exposed through `nix-homebrew.taps."homebrew/homebrew-cask"`.
+- Keep `manaflow-ai/cmux` in `homebrew.taps` and expose `inputs.homebrew-cmux` through `nix-homebrew.taps."manaflow-ai/homebrew-cmux"` for the cmux cask.
 - Activation sets `HOMEBREW_NO_INSTALL_FROM_API=1`, so cask behavior should be checked with the no-API path when debugging casks.
 - If a cask DSL error appears, consider whether `nix-homebrew`, its `brew-src`, and `homebrew-cask` are pinned to compatible revisions.
 
