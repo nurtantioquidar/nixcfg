@@ -3,7 +3,6 @@
 {
   imports = [
     # ./vscode.nix
-    ./homebrew.nix
     ./git.nix
     ./zsh.nix
     ./fish.nix
