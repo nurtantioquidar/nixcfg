@@ -365,21 +365,25 @@ nix-homebrew = {
 };
 ```
 
-Reason: this manages Homebrew installation/bootstrap state, Rosetta-related setup, migration behavior, and pinned tap checkouts.
+Reason: this manages Homebrew installation/bootstrap state, Rosetta-related setup, migration behavior, and pinned tap checkouts. This is the only Homebrew piece still tied to `sudo darwin-rebuild`, and it only changes on bootstrap or when tap inputs change.
 
-### Homebrew Activation
+### Homebrew Package Management
 
-Defined in `nix/hosts/mbp/homebrew.nix`:
+Moved to the user-scoped Home Manager profile at `nix/home/homebrew.nix` (imported by `nix/home/home.nix`).
 
-```nix
-homebrew.onActivation = {
-  cleanup = "zap";
-  autoUpdate = true;
-  extraEnv.HOMEBREW_NO_INSTALL_FROM_API = "1";
-};
+The `taps`/`brews`/`casks` lists there are the single source of truth. A Brewfile is generated from them and applied by a `home.activation.brewBundle` script running `brew bundle --file=<generated> --cleanup`. Because nix-homebrew makes `/opt/homebrew` user-owned, this runs as `hades` with no sudo:
+
+```bash
+home-manager switch --flake ~/.config/nix#hades
 ```
 
-Reason: this mutates Homebrew state during nix-darwin activation. If Homebrew remains managed by nix-darwin, this remains tied to `sudo darwin-rebuild`.
+Behavior notes:
+
+- `--cleanup` prunes any cask/brew not in the Nix lists (replaces the former `onActivation.cleanup = "zap"`). Ad-hoc `brew install` packages not added to the lists are removed on the next switch.
+- `HOMEBREW_NO_INSTALL_FROM_API=1` is preserved, so casks resolve from the pinned local tap checkout.
+- `HOMEBREW_NO_AUTO_UPDATE=1` keeps switches fast; run `brew update && brew upgrade` (also sudo-free) on your own cadence.
+
+Reason: package installs, upgrades, and cleanup are user-level once the prefix is user-owned, so they no longer need to ride inside `sudo darwin-rebuild`.
 
 ### Privileged Apps
 
