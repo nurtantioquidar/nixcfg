@@ -1,11 +1,12 @@
 # Nix Setup Guide
 
-This repository manages two flake outputs:
+This repository manages three flake outputs:
 
 - `darwinConfigurations.styx` for the macOS host.
 - `nixosConfigurations.wsl` for the NixOS-WSL host.
+- `homeConfigurations.hades` for standalone macOS Home Manager activation.
 
-Darwin is the primary path in this guide. WSL uses the same Home Manager profile where practical.
+Darwin is the primary system path in this guide. WSL uses the same Home Manager profile where practical. On macOS, day-to-day user-level changes should prefer standalone Home Manager when they do not need root.
 
 ## Prerequisites
 
@@ -32,6 +33,15 @@ sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 Select the Darwin output explicitly with `#styx`. Do not rely on hostname inference; this Mac may report a hostname that does not match the flake output name.
 
 With flakes, local changes must be visible to Git before a rebuild can read them. Stage or commit changed files first when a rebuild says a path is missing from the source tree.
+
+For user-level macOS changes, build and switch the standalone Home Manager profile without sudo:
+
+```bash
+nix --extra-experimental-features nix-command --extra-experimental-features flakes build /Users/hades/.config/nix#homeConfigurations.hades.activationPackage --impure
+home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
+```
+
+Use this path for user packages, shells, Git, prompt, dotfiles, and other user-scoped settings. Keep `sudo darwin-rebuild` for system state such as users, login shell registration, hostname, Nix daemon/global settings, Homebrew bootstrap, and privileged apps.
 
 ## Documentation Conventions
 
@@ -62,6 +72,36 @@ programs.starship = {
 `git_status.disabled = true` means the prompt currently shows the Git branch but not dirty, staged, ahead, or behind status. Remove or set that option to `false` if prompt Git status should be restored.
 
 Fish is the shell that should receive day-to-day PATH and SDKMAN behavior. `nix/home/fish.nix` points SDKMAN at `$HOME/.sdkman`, matching the Home Manager activation that installs SDKMAN there.
+
+## macOS User Preferences
+
+Standalone Home Manager manages user-scoped macOS preferences and assets where possible:
+
+- Dock orientation, autohide, tile size, `show-recents`, and `static-only`.
+- Fira Code and JetBrains Mono Nerd Fonts under `~/Library/Fonts/HomeManager`.
+- App links under `~/Applications/home-manager-apps`.
+
+Dock persistent apps remain in nix-darwin for now because nix-darwin exposes a richer `system.defaults.dock.persistent-apps` option than Home Manager's typed Darwin defaults module.
+
+Spotlight must be enabled for user apps to appear in Spotlight search. If `mdutil -s "$HOME"` reports that the Spotlight server is disabled, app registration and `mdimport` will not make those apps searchable until Spotlight is enabled by policy or admin action.
+
+Normal macOS GUI apps should stay in Homebrew/nix-darwin unless a specific app has been proven reliable from Home Manager. Home Manager links app bundles into `~/Applications/home-manager-apps` as symlinks to `/nix/store`; several GUI apps failed macOS code-signing/Gatekeeper checks from that location. Keep Home Manager focused on CLI/dev tools and user-scoped configuration.
+
+## Codex CLI
+
+Codex CLI is user-managed through `nix/home/codex.nix` instead of the nixpkgs `codex` package. Home Manager installs the official standalone CLI into `~/.local/bin/codex` when it is missing and provides this updater:
+
+```bash
+codex-upgrade
+```
+
+`codex-upgrade` reruns OpenAI's standalone installer with `CODEX_NON_INTERACTIVE=1`, matching the official macOS/Linux install and upgrade path documented at <https://developers.openai.com/codex/cli>. This keeps Codex CLI upgrades out of the sudo or Homebrew path.
+
+## VS Code
+
+VS Code Settings Sync is the source of truth for settings, extensions, keybindings, snippets, and profiles.
+
+VS Code is Homebrew-managed as a normal macOS GUI app. Do not import `nix/home/vscode.nix` as-is unless declarative VS Code settings and extensions are intentionally desired; Settings Sync remains responsible for that user data.
 
 ## Git Configuration
 
@@ -165,13 +205,19 @@ The verification script creates a temporary repository with `mktemp`, attempts a
 
 ## SSH Agent Configuration
 
-`nix/home/ssh.nix` contains a Home Manager SSH config for the 1Password agent, but `nix/home/home.nix` does not currently import it. Keep using manual SSH config unless you intentionally enable that module.
-
-Manual macOS SSH config:
+`nix/home/ssh.nix` manages the user SSH client config through Home Manager. It preserves the OrbStack and Colima include files and configures the 1Password SSH agent for all hosts:
 
 ```sshconfig
+Include ~/.orbstack/ssh/config /Users/hades/.colima/ssh_config
+
 Host *
-    IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+    IdentityAgent ~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
+```
+
+The pre-Home Manager SSH config was backed up during migration:
+
+```sshconfig
+~/.ssh/config.backup
 ```
 
 ## WSL Notes
@@ -231,7 +277,18 @@ CLI tools are usually better managed through Nix when possible. For example, Goo
 
 ### Homebrew Cleanup Refuses To Uninstall Dependencies
 
-This config uses `homebrew.onActivation.cleanup = "zap"` so unmanaged Homebrew packages are pruned during activation. If cleanup refuses to uninstall a formula because an installed cask still depends on it, keep that formula in `homebrew.brews`; for example, `python@3.13` and `ripgrep` are listed because Homebrew reported them as live cask dependencies.
+This config uses `homebrew.onActivation.cleanup = "zap"` so unmanaged Homebrew packages are pruned during activation. If cleanup refuses to uninstall a formula because an installed cask still depends on it, keep that formula in `homebrew.brews` until the dependent cask is migrated or removed.
+
+### Homebrew Cask Removal Hits Immutable Files
+
+If `brew bundle cleanup` or `brew uninstall --cask` cannot remove an old app because files are marked immutable, clear the flag during an admin window and retry the cask removal:
+
+```bash
+sudo chflags -R nouchg /Applications/Visual\ Studio\ Code.app /opt/homebrew/Caskroom/visual-studio-code
+brew uninstall --cask --force visual-studio-code
+```
+
+This was needed when moving VS Code from Homebrew cask ownership to the Home Manager `pkgs.vscode` app link under `~/Applications/home-manager-apps`. The same pattern was also needed when removing the old Claude Desktop cask after Electron framework symlink/chflags backup errors.
 
 ### NPM Deprecation Warnings During Rebuild
 

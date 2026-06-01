@@ -6,6 +6,7 @@ This repository manages personal Nix configuration for macOS and WSL.
 
 - macOS host: `darwinConfigurations.styx`
 - WSL host: `nixosConfigurations.wsl`
+- Standalone macOS Home Manager profile: `homeConfigurations.hades`
 - Shared Home Manager profile: `nix/home/home.nix`
 - Primary reference docs: `docs/setup-guide.md`
 
@@ -15,6 +16,7 @@ This repository manages personal Nix configuration for macOS and WSL.
 - Keep host-specific changes under `nix/hosts/mbp` or `nix/hosts/wsl`.
 - Keep host-specific helper scripts under `nix/hosts/<host>/scripts`.
 - Keep shared user packages, shells, Git, prompt, and dotfile behavior under `nix/home`.
+- Keep Codex CLI user-managed through `nix/home/codex.nix`; use `codex-upgrade` to rerun OpenAI's standalone installer without sudo.
 - Keep local secrets outside this flake. The expected external secrets path is documented in `docs/setup-guide.md`.
 - Git SSH signing verification is managed through Home Manager. `nix/home/git.nix` writes `~/.config/git/allowed_signers` from the external `userEmail` and `sshSigningKey` values when 1Password signing is enabled.
 - Do not mutate Nix store paths or Nix-managed Homebrew tap symlinks directly. Change flake inputs or Nix modules instead.
@@ -37,6 +39,15 @@ sudo darwin-rebuild switch --flake /Users/hades/.config/nix#styx --impure
 ```
 
 Do not rely on hostname inference. This Mac may report a hostname that does not match the flake output name.
+
+For user-level macOS Home Manager changes, validate and switch the standalone profile without sudo:
+
+```bash
+nix --extra-experimental-features nix-command --extra-experimental-features flakes build /Users/hades/.config/nix#homeConfigurations.hades.activationPackage --impure
+home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
+```
+
+Keep root-required macOS settings in `darwinConfigurations.styx`; move user packages, shells, Git, prompt, and dotfile behavior through `homeConfigurations.hades` when possible.
 
 For WSL:
 
