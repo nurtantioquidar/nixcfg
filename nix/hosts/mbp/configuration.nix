@@ -22,11 +22,6 @@ in
 
     defaults = {
       dock = {
-        orientation = "left";
-        autohide = true;
-        show-recents = false;
-        static-only = true;
-        tilesize = 30;
         persistent-apps = [
           "/Applications/Windsurf.app"
           "/Applications/Google Chrome.app"
@@ -40,13 +35,6 @@ in
   nix.enable = false;
 
   environment.shells = with pkgs; [ fish zsh ];
-  environment.systemPackages =
-    [
-      pkgs.mkalias
-      pkgs.neovim
-      pkgs.tmux
-      pkgs.google-chrome
-    ];
 
   programs.fish.enable = true;
 
@@ -61,9 +49,4 @@ in
     experimental-features = nix-command flakes
     extra-platforms = x86_64-darwin aarch64-darwin
   '';
-
-  fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.fira-code
-  ];
 }

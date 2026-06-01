@@ -8,10 +8,11 @@
     ./fish.nix
     ./bash.nix
     ./claude-code.nix
+    ./codex.nix
     ./node-packages.nix
-    # ./ssh.nix
-    # ./nvim.nix
-    # ./tmux.nix
+    ./ssh.nix
+    ./nvim.nix
+    ./tmux.nix
   ];
 
   home = {
@@ -23,6 +24,8 @@
       curl
       coreutils
       jq
+      nerd-fonts.fira-code
+      nerd-fonts.jetbrains-mono
       ripgrep
       ngrok
       unzip
@@ -32,12 +35,37 @@
       delve
       mockgen
       google-cloud-sdk
+    ] ++ lib.optionals pkgs.stdenv.isDarwin [
+      act
+      argocd
+      bun
+      cloudflared
+      colima
+      docker
+      docker-compose
+      gnupg
+      kubectl
+      mas
+      mkalias
+      oci-cli
+      pinentry_mac
+      pipx
+      pnpm
+      python313
+      slackdump
+      tree
+      uv
+      woff2
     ];
 
     # Ensure ~/.local/bin is on PATH for all processes (not just interactive shells)
     # This fixes warnings from tools like `uv` that check PATH in non-interactive contexts
     sessionVariables = {
       PATH = "$HOME/.local/bin:$PATH";
+    } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      EDITOR = "zed --wait";
+      VISUAL = "zed --wait";
+      GIT_EDITOR = "zed --wait";
     };
 
     activation.installSdkman = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -46,9 +74,18 @@
         $DRY_RUN_CMD ${pkgs.curl}/bin/curl -s "https://get.sdkman.io?rcupdate=false" | $DRY_RUN_CMD ${pkgs.bash}/bin/bash
       fi
     '';
+
+    activation.configureDock = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      if [ "$(uname -s)" = "Darwin" ]; then
+        $DRY_RUN_CMD /usr/bin/defaults write com.apple.dock show-recents -bool false
+        $DRY_RUN_CMD /usr/bin/defaults write com.apple.dock static-only -bool true
+      fi
+    '';
   };
 
   programs = {
+    home-manager.enable = true;
+
     dircolors = {
       enable = true;
     };
@@ -147,6 +184,19 @@
           disabled = false;
         };
       };
+    };
+  };
+
+  targets.darwin.linkApps = lib.mkIf pkgs.stdenv.isDarwin {
+    enable = true;
+    directory = "Applications/home-manager-apps";
+  };
+
+  targets.darwin.defaults = lib.mkIf pkgs.stdenv.isDarwin {
+    "com.apple.dock" = {
+      orientation = "left";
+      autohide = true;
+      tilesize = 30;
     };
   };
 }

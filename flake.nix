@@ -72,6 +72,31 @@
           };
         };
 
+      homeConfigurations =
+        let
+          inherit (inputs.home-manager.lib) homeManagerConfiguration;
+
+          system = "aarch64-darwin";
+          pkgs = import nixpkgs ({ inherit system; } // nixpkgsConfig);
+        in
+        {
+          hades = homeManagerConfiguration {
+            inherit pkgs;
+
+            extraSpecialArgs = { inherit inputs; };
+
+            modules = [
+              ./nix/home/home.nix
+              {
+                home = {
+                  username = "hades";
+                  homeDirectory = "/Users/hades";
+                };
+              }
+            ];
+          };
+        };
+
       nixosConfigurations =
         let
           inherit (nixpkgs.lib) nixosSystem;

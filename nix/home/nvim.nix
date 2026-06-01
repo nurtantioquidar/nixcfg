@@ -3,6 +3,8 @@
 {
   programs.neovim = {
     enable = true;
+    withPython3 = true;
+    withRuby = true;
 
     extraPackages = with pkgs; [
       tree-sitter

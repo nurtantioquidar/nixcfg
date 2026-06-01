@@ -85,7 +85,7 @@ in
         };
 
         core = {
-          editor = "nvim";
+          editor = if pkgs.stdenv.isDarwin then "zed --wait" else "nvim";
           fscache = true;
           untrackedCache = true;
         };
