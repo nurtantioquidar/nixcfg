@@ -154,9 +154,7 @@ Reason: these are user-consumed tools/apps. They do not need to be installed int
 
 ### Homebrew CLI Tools
 
-Currently in `nix/hosts/mbp/homebrew.nix` under `homebrew.brews`.
-
-Move most CLI tools to `home.packages`, preferably using nixpkgs packages:
+CLI tools should live in `home.packages` when nixpkgs has an equivalent package:
 
 - `act`
 - `argocd`
@@ -189,9 +187,7 @@ Note that some tools may still need runtime privileges for particular actions. F
 
 ### Ordinary GUI Apps
 
-Currently in `nix/hosts/mbp/homebrew.nix` under `homebrew.casks`.
-
-These remain Homebrew-managed for macOS app-bundle reliability:
+These remain Homebrew-managed for macOS app-bundle reliability, but they should be installed by the user instead of through nix-darwin activation:
 
 - `zed`
 - `brave-browser`
@@ -210,9 +206,9 @@ These remain Homebrew-managed for macOS app-bundle reliability:
 - `visual-studio-code`
 - `zoom`
 
-Reason: Home Manager app links point into `/nix/store`, and several macOS GUI bundles failed Gatekeeper/code-signing checks or behaved poorly with Spotlight/LaunchServices from that location. Homebrew casks install real app bundles under `/Applications`, which is the more reliable path for GUI apps on this managed Mac.
+Reason: Home Manager app links point into `/nix/store`, and several macOS GUI bundles failed Gatekeeper/code-signing checks or behaved poorly with Spotlight/LaunchServices from that location. Homebrew casks install real app bundles, which is the more reliable path for GUI apps on this managed Mac.
 
-Tradeoff: these app updates require the nix-darwin/Homebrew admin path.
+Tradeoff: privileged casks remain on the nix-darwin/Homebrew admin path. Ordinary app-bundle casks are user-installed under `/Users/hades/Applications` after Homebrew is bootstrapped. Casks that run package installers or install privileged components may still require admin privileges.
 
 Already moved or removed during the migration:
 
@@ -379,7 +375,7 @@ homebrew.onActivation = {
 };
 ```
 
-Reason: this mutates Homebrew state during nix-darwin activation. If Homebrew remains managed by nix-darwin, this remains tied to `sudo darwin-rebuild`.
+Reason: this mutates Homebrew state during nix-darwin activation. Keep this path focused on bootstrap, pinned taps, and privileged casks so ordinary app installs can remain user-owned.
 
 ### Privileged Apps
 
@@ -441,7 +437,7 @@ Expected admin cadence:
 
 - One initial admin window for the migration and cleanup.
 - After migration, likely `0-2` admin windows per year.
-- More frequent admin access only if VPN, audio driver, virtualization, security, hostname, user account, login shell, Nix daemon, or Homebrew bootstrap settings change.
+- More frequent admin access only if VPN, audio driver, virtualization, security, hostname, user account, login shell, Nix daemon, Homebrew bootstrap settings, or privileged casks change.
 
 Routine changes that should not need sudo after migration:
 
@@ -537,7 +533,7 @@ Batch 1:
 
 - Move `environment.systemPackages` from `nix/hosts/mbp/configuration.nix` to `home.packages`.
 - Initial candidates: `mkalias`, `neovim`, `tmux`, `google-chrome`.
-- Status: `mkalias`, Neovim, tmux, and CLI/dev tools are Home Manager-managed. `google-chrome` was moved back to Homebrew with the other normal GUI apps because macOS app bundles are more reliable from `/Applications` than from Home Manager symlinks into `/nix/store`.
+- Status: `mkalias`, Neovim, tmux, and CLI/dev tools are Home Manager-managed. `google-chrome` was moved back to Homebrew with the other normal GUI apps because Homebrew app bundles are more reliable than Home Manager symlinks into `/nix/store`.
 
 Batch 2:
 
@@ -547,8 +543,8 @@ Batch 2:
 Batch 3:
 
 - Ordinary GUI apps were tested in Home Manager-managed Nix packages or user app links, then rolled back to Homebrew.
-- Status: normal GUI apps remain Homebrew/nix-darwin-managed because app bundles were more reliable from `/Applications` than from Home Manager symlinks into `/nix/store`.
-- VS Code remains Homebrew-managed as a normal GUI app. VS Code Settings Sync continues to own settings, extensions, keybindings, snippets, and profiles.
+- Status: normal GUI apps remain Homebrew-managed because app bundles were more reliable than Home Manager symlinks into `/nix/store`, but ordinary casks are installed by the user instead of through nix-darwin activation.
+- VS Code is user-scoped under `/Users/hades/Applications/Visual Studio Code.app`, with Settings Sync continuing to own settings, extensions, keybindings, snippets, and profiles.
 - Keep `ghostty` out of this batch for now. The pinned nixpkgs package evaluated as Linux-only for `aarch64-darwin`, so Ghostty should remain Homebrew-managed unless a working Darwin package mapping is added later.
 
 Batch 4:
@@ -768,7 +764,7 @@ Keep these Homebrew casks system/admin-managed for now:
 - `orbstack`
 - `1password`
 
-Keep these Homebrew-managed until migrated or intentionally left as casks:
+Keep these Homebrew-managed until migrated or intentionally left as user-installed casks:
 
 - `ghostty`
 - `cmux`

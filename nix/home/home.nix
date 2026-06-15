@@ -1,5 +1,10 @@
 { pkgs, lib, ... }:
 
+let
+  vscodeCode = pkgs.writeShellScriptBin "code" ''
+    exec "/Users/hades/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" "$@"
+  '';
+in
 {
   imports = [
     # ./vscode.nix
@@ -9,6 +14,7 @@
     ./bash.nix
     ./claude-code.nix
     ./codex.nix
+    ./homebrew.nix
     ./node-packages.nix
     ./ssh.nix
     ./nvim.nix
@@ -29,6 +35,7 @@
       ripgrep
       ngrok
       unzip
+      zellij
       zip
       go
       gopls
@@ -55,6 +62,7 @@
       slackdump
       tree
       uv
+      vscodeCode
       woff2
     ];
 

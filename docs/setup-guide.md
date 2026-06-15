@@ -41,7 +41,7 @@ nix --extra-experimental-features nix-command --extra-experimental-features flak
 home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
 ```
 
-Use this path for user packages, shells, Git, prompt, dotfiles, and other user-scoped settings. Keep `sudo darwin-rebuild` for system state such as users, login shell registration, hostname, Nix daemon/global settings, Homebrew bootstrap, and privileged apps.
+Use this path for user packages, shells, Git, prompt, dotfiles, and other user-scoped settings. Keep `sudo darwin-rebuild` for system state such as users, login shell registration, hostname, Nix daemon/global settings, Homebrew bootstrap, pinned Homebrew taps, and privileged Homebrew casks.
 
 ## Documentation Conventions
 
@@ -85,7 +85,17 @@ Dock persistent apps remain in nix-darwin for now because nix-darwin exposes a r
 
 Spotlight must be enabled for user apps to appear in Spotlight search. If `mdutil -s "$HOME"` reports that the Spotlight server is disabled, app registration and `mdimport` will not make those apps searchable until Spotlight is enabled by policy or admin action.
 
-Normal macOS GUI apps should stay in Homebrew/nix-darwin unless a specific app has been proven reliable from Home Manager. Home Manager links app bundles into `~/Applications/home-manager-apps` as symlinks to `/nix/store`; several GUI apps failed macOS code-signing/Gatekeeper checks from that location. Keep Home Manager focused on CLI/dev tools and user-scoped configuration.
+Normal macOS GUI apps should stay out of Home Manager unless a specific app has been proven reliable from Home Manager. Home Manager links app bundles into `~/Applications/home-manager-apps` as symlinks to `/nix/store`; several GUI apps failed macOS code-signing/Gatekeeper checks from that location. Keep Home Manager focused on CLI/dev tools and user-scoped configuration.
+
+Ordinary Homebrew casks are declared in `nix/home/homebrew.nix`. Add app-bundle casks to the `userCasks` list, then run the standalone Home Manager activation:
+
+```bash
+home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
+```
+
+The module writes `~/.config/homebrew/Brewfile` and runs `brew bundle install --no-upgrade` as the user. Home Manager exports `HOMEBREW_CASK_OPTS=--appdir=/Users/hades/Applications` on macOS, so ordinary app-bundle casks install real app bundles under the user-owned `~/Applications` directory without requiring `sudo darwin-rebuild`. Casks that run package installers or install VPNs, system extensions, audio drivers, virtualization helpers, or other privileged components may still need admin privileges; keep those in `nix/hosts/mbp/homebrew.nix`.
+
+The user-level Brewfile does not run `brew bundle cleanup`. Cleanup is intentionally manual because Homebrew cleanup sees all installed casks, including privileged casks owned by the Darwin profile.
 
 ## Codex CLI
 
@@ -101,7 +111,9 @@ codex-upgrade
 
 VS Code Settings Sync is the source of truth for settings, extensions, keybindings, snippets, and profiles.
 
-VS Code is Homebrew-managed as a normal macOS GUI app. Do not import `nix/home/vscode.nix` as-is unless declarative VS Code settings and extensions are intentionally desired; Settings Sync remains responsible for that user data.
+VS Code is kept as a user-scoped macOS app at `/Users/hades/Applications/Visual Studio Code.app`. Home Manager installs a user-level `code` wrapper that executes `/Users/hades/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code` so the CLI is available without admin privileges and without shell alias quoting issues. This home-directory app path is intentional because previous VS Code ownership and app-bundle handling caused issues when moving between Homebrew, Home Manager app links, and system locations.
+
+Do not import `nix/home/vscode.nix` as-is unless declarative VS Code settings and extensions are intentionally desired; Settings Sync remains responsible for that user data.
 
 ## Git Configuration
 
@@ -236,7 +248,7 @@ sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 
 ### Homebrew Cask API Fails During Rebuild
 
-`nix/hosts/mbp/homebrew.nix` lets Homebrew update during activation but runs `brew bundle` with `HOMEBREW_NO_INSTALL_FROM_API=1`. This avoids failures in Homebrew's cask API loader, such as:
+`nix/hosts/mbp/homebrew.nix` lets Homebrew update during activation and runs `brew bundle` for privileged casks with `HOMEBREW_NO_INSTALL_FROM_API=1`. This avoids failures in Homebrew's cask API loader, such as:
 
 ```text
 Error: undefined method 'to_sym' for nil
@@ -249,7 +261,7 @@ Disabling the API means Homebrew must resolve casks from a local tap checkout in
 Error: No available formula with the name "chatgpt".
 ```
 
-To cover both cases, this repo pins `github:homebrew/homebrew-cask` as the `homebrew-cask` flake input and exposes it through `nix-homebrew.taps."homebrew/homebrew-cask"`. Keep `homebrew/cask` in `homebrew.taps` too, so nix-darwin's generated Brewfile treats that tap as managed during `brew bundle --cleanup`.
+To cover both cases, this repo pins `github:homebrew/homebrew-cask` as the `homebrew-cask` flake input and exposes it through `nix-homebrew.taps."homebrew/homebrew-cask"`. Keep `homebrew/cask` in `homebrew.taps` too, so nix-darwin's generated Brewfile can resolve casks without using the API.
 
 Third-party taps that provide casks follow the same split. For example, cmux uses the Brewfile tap alias `manaflow-ai/cmux`, while `nix-homebrew.taps."manaflow-ai/homebrew-cmux"` points at the pinned `git+https://github.com/manaflow-ai/homebrew-cmux.git` flake input.
 
@@ -271,13 +283,13 @@ sudo darwin-rebuild switch --flake /Users/hades/.config/nix#styx --impure
 
 ### A Cask Vendor Download Fails
 
-If one cask download returns a vendor-side HTTP error, `brew bundle` fails the whole activation. Keep that app out of `homebrew.casks` until the vendor URL is healthy again, then install it manually or re-enable it in `nix/hosts/mbp/homebrew.nix`.
+If one privileged cask download returns a vendor-side HTTP error, `brew bundle` fails the whole activation. Keep that app out of `homebrew.casks` until the vendor URL is healthy again, then install it manually or re-enable it in `nix/hosts/mbp/homebrew.nix`.
 
 CLI tools are usually better managed through Nix when possible. For example, Google Cloud SDK is installed as `google-cloud-sdk` through Home Manager instead of the Homebrew `gcloud-cli` cask, avoiding Caskroom upgrade state failures during activation.
 
 ### Homebrew Cleanup Refuses To Uninstall Dependencies
 
-This config uses `homebrew.onActivation.cleanup = "zap"` so unmanaged Homebrew packages are pruned during activation. If cleanup refuses to uninstall a formula because an installed cask still depends on it, keep that formula in `homebrew.brews` until the dependent cask is migrated or removed.
+This config uses `homebrew.onActivation.cleanup = "none"` so ordinary user-installed Homebrew apps are not pruned during activation. If cleanup is temporarily changed to `uninstall` or `zap`, remember that unmanaged casks installed outside `nix/hosts/mbp/homebrew.nix` may be removed during the next `sudo darwin-rebuild`.
 
 ### Homebrew Cask Removal Hits Immutable Files
 

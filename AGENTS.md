@@ -17,6 +17,7 @@ This repository manages personal Nix configuration for macOS and WSL.
 - Keep host-specific helper scripts under `nix/hosts/<host>/scripts`.
 - Keep shared user packages, shells, Git, prompt, and dotfile behavior under `nix/home`.
 - Keep Codex CLI user-managed through `nix/home/codex.nix`; use `codex-upgrade` to rerun OpenAI's standalone installer without sudo.
+- Keep the VS Code CLI user-scoped on macOS. Home Manager installs a `code` wrapper for `/Users/hades/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code` because this machine previously had VS Code ownership and app-bundle issues when moving between Homebrew, Home Manager app links, and system locations.
 - Keep local secrets outside this flake. The expected external secrets path is documented in `docs/setup-guide.md`.
 - Git SSH signing verification is managed through Home Manager. `nix/home/git.nix` writes `~/.config/git/allowed_signers` from the external `userEmail` and `sshSigningKey` values when 1Password signing is enabled.
 - Do not mutate Nix store paths or Nix-managed Homebrew tap symlinks directly. Change flake inputs or Nix modules instead.
@@ -57,11 +58,14 @@ sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 
 ## Homebrew Notes
 
-Homebrew is managed through `nix-homebrew` and `nix/hosts/mbp/homebrew.nix`.
+Homebrew bootstrap, pinned taps, and privileged casks are managed through `nix-homebrew` and `nix/hosts/mbp/homebrew.nix`.
 
 - Keep `homebrew/cask` in `homebrew.taps`.
 - Keep `inputs.homebrew-cask` exposed through `nix-homebrew.taps."homebrew/homebrew-cask"`.
 - Keep `manaflow-ai/cmux` in `homebrew.taps` and expose `inputs.homebrew-cmux` through `nix-homebrew.taps."manaflow-ai/homebrew-cmux"` for the cmux cask.
+- Keep ordinary app-bundle casks out of Darwin `homebrew.casks`; declare them in `nix/home/homebrew.nix` instead. Home Manager writes a user Brewfile and runs `brew bundle install --no-upgrade` with `HOMEBREW_CASK_OPTS=--appdir=/Users/hades/Applications`. Casks with package installers or privileged components may still need the admin path.
+- Do not enable automatic `brew bundle cleanup` in the user Homebrew module; cleanup sees all Homebrew casks, including privileged casks owned by the Darwin profile.
+- Keep `homebrew.onActivation.cleanup = "none"` unless intentionally pruning user-installed Homebrew apps.
 - Activation sets `HOMEBREW_NO_INSTALL_FROM_API=1`, so cask behavior should be checked with the no-API path when debugging casks.
 - If a cask DSL error appears, consider whether `nix-homebrew`, its `brew-src`, and `homebrew-cask` are pinned to compatible revisions.
 
