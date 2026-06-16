@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   zellijNoGhosttyQueries = (pkgs.writeShellScriptBin "zellij" ''
     ghostty_outer_tty=false
@@ -42,6 +42,12 @@ let
   };
 in
 {
+  home.file.".config/ghostty/config" = lib.mkIf pkgs.stdenv.isDarwin {
+    text = ''
+      macos-option-as-alt = left
+    '';
+  };
+
   home.file.".config/zellij/config.kdl" = {
     text = ''
       theme "default"

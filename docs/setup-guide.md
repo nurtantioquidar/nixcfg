@@ -319,7 +319,7 @@ echo $SHELL
 
 `/Users/hades/.config/nix/.envrc` uses `use flake`, so direnv can enter a Nix shell that sets `TMPDIR` to a transient `nix-shell.*` directory. Zellij uses `TMPDIR` for runtime socket and log state, which can break Ghostty/Zellij startup and leave terminal DSR responses like `?997;2n` in the shell prompt.
 
-`nix/home/zellij.nix` installs a Home Manager-managed Zellij wrapper that normalizes `TMPDIR` back to the parent macOS temp directory before launching Zellij, downgrades Ghostty's outer `TERM` to `xterm-256color`, and drains a late DSR response on exit. Keep future Zellij/Ghostty fixes in that module.
+`nix/home/zellij.nix` installs a Home Manager-managed Zellij wrapper that normalizes `TMPDIR` back to the parent macOS temp directory before launching Zellij, downgrades Ghostty's outer `TERM` to `xterm-256color`, and drains a late DSR response on exit. On macOS, it also writes `~/.config/ghostty/config` with `macos-option-as-alt = left` so the left Option key works as terminal Alt for Zellij bindings while the right Option key remains available for macOS character input. For Zellij prompts that show `<Del>`, use `Fn+Delete` on Mac keyboards; the key labeled Delete is normally Backspace, and Ghostty cannot bind `fn` directly. Keep future Zellij/Ghostty fixes in that module.
 
 ### Secrets Are Placeholders
 
