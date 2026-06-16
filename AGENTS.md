@@ -17,6 +17,7 @@ This repository manages personal Nix configuration for macOS and WSL.
 - Keep host-specific helper scripts under `nix/hosts/<host>/scripts`.
 - Keep shared user packages, shells, Git, prompt, and dotfile behavior under `nix/home`.
 - Keep Codex CLI user-managed through `nix/home/codex.nix`; use `codex-upgrade` to rerun OpenAI's standalone installer without sudo.
+- Keep Zellij user-managed through `nix/home/zellij.nix`. Its wrapper intentionally normalizes `TMPDIR` outside direnv/Nix `nix-shell.*` temp directories and downgrades Ghostty's outer `TERM` to avoid leaked DSR responses like `?997;2n` when launching Zellij from this repo.
 - Keep the VS Code CLI user-scoped on macOS. Home Manager installs a `code` wrapper for `/Users/hades/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code` because this machine previously had VS Code ownership and app-bundle issues when moving between Homebrew, Home Manager app links, and system locations.
 - Keep local secrets outside this flake. The expected external secrets path is documented in `docs/setup-guide.md`.
 - Git SSH signing verification is managed through Home Manager. `nix/home/git.nix` writes `~/.config/git/allowed_signers` from the external `userEmail` and `sshSigningKey` values when 1Password signing is enabled.

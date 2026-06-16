@@ -315,6 +315,12 @@ which starship
 echo $SHELL
 ```
 
+### Zellij Leaks `?997;2n` In This Repo
+
+`/Users/hades/.config/nix/.envrc` uses `use flake`, so direnv can enter a Nix shell that sets `TMPDIR` to a transient `nix-shell.*` directory. Zellij uses `TMPDIR` for runtime socket and log state, which can break Ghostty/Zellij startup and leave terminal DSR responses like `?997;2n` in the shell prompt.
+
+`nix/home/zellij.nix` installs a Home Manager-managed Zellij wrapper that normalizes `TMPDIR` back to the parent macOS temp directory before launching Zellij, downgrades Ghostty's outer `TERM` to `xterm-256color`, and drains a late DSR response on exit. Keep future Zellij/Ghostty fixes in that module.
+
 ### Secrets Are Placeholders
 
 Check the external file and the path hard-coded in `nix/home/git.nix`:

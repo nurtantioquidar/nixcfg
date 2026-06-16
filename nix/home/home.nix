@@ -19,6 +19,7 @@ in
     ./ssh.nix
     ./nvim.nix
     ./tmux.nix
+    ./zellij.nix
   ];
 
   home = {
@@ -35,7 +36,6 @@ in
       ripgrep
       ngrok
       unzip
-      zellij
       zip
       go
       gopls
