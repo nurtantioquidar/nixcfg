@@ -14,6 +14,7 @@ in
     ./bash.nix
     ./claude-code.nix
     ./codex.nix
+    ./ghostty.nix
     ./homebrew.nix
     ./node-packages.nix
     ./ssh.nix
