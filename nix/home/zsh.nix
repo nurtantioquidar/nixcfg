@@ -14,8 +14,13 @@ _:
       export PATH="/usr/bin:$PATH"
       export PATH="/opt/homebrew/bin:$PATH"
       export PATH="/opt/local/bin:$PATH"
+      if [ -d "/etc/profiles/per-user/$USER/bin" ]; then
+        export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
+      fi
       export PATH="/run/current-system/sw/bin:$PATH"
-      export PATH="$HOME/.nix-profile/bin:$PATH"
+      if [ -d "$HOME/.nix-profile/bin" ]; then
+        export PATH="$HOME/.nix-profile/bin:$PATH"
+      fi
       export PATH="$HOME/.local/bin:$PATH"
 
       # Google Cloud SDK

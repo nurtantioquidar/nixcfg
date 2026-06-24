@@ -18,8 +18,13 @@
       fish_add_path -amP /usr/bin
       fish_add_path -amP /opt/homebrew/bin
       fish_add_path -amP /opt/local/bin
+      if test -d /etc/profiles/per-user/$USER/bin
+          fish_add_path -m /etc/profiles/per-user/$USER/bin
+      end
       fish_add_path -m /run/current-system/sw/bin
-      fish_add_path -m $HOME/.nix-profile/bin
+      if test -d $HOME/.nix-profile/bin
+          fish_add_path -m $HOME/.nix-profile/bin
+      end
       fish_add_path -m $HOME/.local/bin
 
       # SDKMAN! initialization
