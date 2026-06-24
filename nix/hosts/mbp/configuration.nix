@@ -14,7 +14,11 @@ in
     ];
   };
 
-  networking.hostName = "styx";
+  networking = {
+    hostName = "MAC-F0Q3XN9HR9";
+    localHostName = "MAC-F0Q3XN9HR9";
+    computerName = "MAC-F0Q3XN9HR9";
+  };
 
   system = {
     stateVersion = 5;

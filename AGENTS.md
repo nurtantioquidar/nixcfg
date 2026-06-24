@@ -4,7 +4,7 @@ This repository manages personal Nix configuration for macOS and WSL.
 
 ## Scope
 
-- macOS host: `darwinConfigurations.styx`
+- macOS host: `darwinConfigurations.styx` with IT hostname alias `darwinConfigurations.MAC-F0Q3XN9HR9`
 - WSL host: `nixosConfigurations.wsl`
 - Standalone macOS Home Manager profile: `homeConfigurations.hades`
 - Shared Home Manager profile: `nix/home/home.nix`
@@ -40,7 +40,7 @@ For the Darwin host, select the configured host explicitly:
 sudo darwin-rebuild switch --flake /Users/hades/.config/nix#styx --impure
 ```
 
-Do not rely on hostname inference. This Mac may report a hostname that does not match the flake output name.
+The IT-managed macOS hostname is also exposed as `#MAC-F0Q3XN9HR9`; keep `#styx` as the friendly alias.
 
 For user-level macOS Home Manager changes, validate and switch the standalone profile without sudo:
 
@@ -49,7 +49,7 @@ nix --extra-experimental-features nix-command --extra-experimental-features flak
 home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
 ```
 
-Keep root-required macOS settings in `darwinConfigurations.styx`; move user packages, shells, Git, prompt, and dotfile behavior through `homeConfigurations.hades` when possible.
+Keep root-required macOS settings in `darwinConfigurations.styx` / `darwinConfigurations.MAC-F0Q3XN9HR9`; move user packages, shells, Git, prompt, and dotfile behavior through `homeConfigurations.hades` when possible.
 
 For WSL:
 

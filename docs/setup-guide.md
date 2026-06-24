@@ -2,7 +2,7 @@
 
 This repository manages three flake outputs:
 
-- `darwinConfigurations.styx` for the macOS host.
+- `darwinConfigurations.styx` for the macOS host, with `darwinConfigurations.MAC-F0Q3XN9HR9` as the IT hostname alias.
 - `nixosConfigurations.wsl` for the NixOS-WSL host.
 - `homeConfigurations.hades` for standalone macOS Home Manager activation.
 
@@ -30,7 +30,7 @@ sudo darwin-rebuild switch --flake /Users/hades/.config/nix#styx --impure
 sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 ```
 
-Select the Darwin output explicitly with `#styx`. Do not rely on hostname inference; this Mac may report a hostname that does not match the flake output name.
+Select the Darwin output explicitly with `#styx` for the friendly name, or `#MAC-F0Q3XN9HR9` when matching the IT-managed hostname.
 
 With flakes, local changes must be visible to Git before a rebuild can read them. Stage or commit changed files first when a rebuild says a path is missing from the source tree.
 

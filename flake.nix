@@ -47,9 +47,7 @@
       darwinConfigurations =
         let
           inherit (inputs.nix-darwin.lib) darwinSystem;
-        in
-        {
-          "styx" = darwinSystem {
+          styx = darwinSystem {
             system = "aarch64-darwin";
 
             specialArgs = { inherit inputs; };
@@ -70,6 +68,10 @@
               }
             ];
           };
+        in
+        {
+          "styx" = styx;
+          "MAC-F0Q3XN9HR9" = styx;
         };
 
       homeConfigurations =
