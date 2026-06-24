@@ -8,6 +8,16 @@ let
     "rectangle"
     "scroll-reverser"
     "the-unarchiver"
+    "spotify"
+    "soundsource"
+    "orbstack"
+  ];
+
+  # These were briefly user-managed during the Homebrew split, but they are
+  # installer/pkg casks that do not honor the user appdir cleanly.
+  systemCasks = [
+    "mullvad-vpn"
+    "expressvpn"
   ];
 
   brewfile = pkgs.writeText "user-homebrew-Brewfile" ''
@@ -18,6 +28,10 @@ let
 
   userCasksList = pkgs.writeText "user-homebrew-casks" ''
     ${lib.concatStringsSep "\n" userCasks}
+  '';
+
+  systemCasksList = pkgs.writeText "system-homebrew-casks" ''
+    ${lib.concatStringsSep "\n" systemCasks}
   '';
 in
 {
@@ -38,7 +52,7 @@ in
 
         if [ -f "$managed_casks" ]; then
           while IFS= read -r cask; do
-            if [ -n "$cask" ] && ! ${pkgs.gnugrep}/bin/grep -qxF "$cask" "${userCasksList}"; then
+            if [ -n "$cask" ] && ! ${pkgs.gnugrep}/bin/grep -qxF "$cask" "${userCasksList}" && ! ${pkgs.gnugrep}/bin/grep -qxF "$cask" "${systemCasksList}"; then
               if /opt/homebrew/bin/brew list --cask "$cask" >/dev/null 2>&1; then
                 $DRY_RUN_CMD /opt/homebrew/bin/brew uninstall --cask "$cask"
               fi

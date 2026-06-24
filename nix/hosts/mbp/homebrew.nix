@@ -34,8 +34,6 @@
       "mullvad-vpn"
       "1password"
       "expressvpn"
-      "soundsource"
-      "orbstack"
     ];
 
     onActivation = {
