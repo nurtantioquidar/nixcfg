@@ -1,6 +1,11 @@
 { pkgs, lib, ... }:
 
 let
+  # User-owned app-bundle casks installed into $HOME/Applications by the
+  # Home Manager activation below. Treat membership changes as state-changing:
+  # removing an entry that was previously written to managed-casks can uninstall
+  # that cask during activation unless it remains listed in systemCasks or is
+  # moved through an explicit user/admin flow.
   userCasks = [
     "caffeine"
     "iina"
@@ -11,6 +16,7 @@ let
     "spotify"
     "soundsource"
     "orbstack"
+    "claude"
   ];
 
   # These were briefly user-managed during the Homebrew split, but they are
@@ -52,6 +58,9 @@ in
 
         if [ -f "$managed_casks" ]; then
           while IFS= read -r cask; do
+            # Prune only casks this Home Manager module previously recorded as
+            # managed, and never prune entries that are now classified as
+            # system/admin casks.
             if [ -n "$cask" ] && ! ${pkgs.gnugrep}/bin/grep -qxF "$cask" "${userCasksList}" && ! ${pkgs.gnugrep}/bin/grep -qxF "$cask" "${systemCasksList}"; then
               if /opt/homebrew/bin/brew list --cask "$cask" >/dev/null 2>&1; then
                 $DRY_RUN_CMD /opt/homebrew/bin/brew uninstall --cask "$cask"

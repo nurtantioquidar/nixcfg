@@ -33,6 +33,17 @@ _:
 
       export SDKMAN_DIR="$HOME/.sdkman"
       [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+
+      # Ghostty/Zellij can encode Option+Arrow as modified arrow escape
+      # sequences. Bind the common forms so zle does not insert trailing C/D.
+      bindkey '\eb' backward-word
+      bindkey '\ef' forward-word
+      bindkey '\e[1;3D' backward-word
+      bindkey '\e[1;3C' forward-word
+      bindkey '\e[1;9D' backward-word
+      bindkey '\e[1;9C' forward-word
+      bindkey '\e\e[D' backward-word
+      bindkey '\e\e[C' forward-word
     '';
 
     syntaxHighlighting.enable = true;

@@ -34,10 +34,17 @@ Select the Darwin output explicitly with `#styx` for the friendly name, or `#MAC
 
 With flakes, local changes must be visible to Git before a rebuild can read them. Stage or commit changed files first when a rebuild says a path is missing from the source tree.
 
-For user-level macOS changes, build and switch the standalone Home Manager profile without sudo:
+For user-level macOS changes, use the standalone Home Manager profile without sudo.
+
+Validate the Home Manager graph first:
 
 ```bash
 nix --extra-experimental-features nix-command --extra-experimental-features flakes build /Users/hades/.config/nix#homeConfigurations.hades.activationPackage --impure
+```
+
+Activate it only when the change should be applied to the user environment:
+
+```bash
 home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
 ```
 
@@ -87,7 +94,15 @@ Spotlight must be enabled for user apps to appear in Spotlight search. If `mduti
 
 Normal macOS GUI apps should stay out of Home Manager unless a specific app has been proven reliable from Home Manager. Home Manager links app bundles into `~/Applications/home-manager-apps` as symlinks to `/nix/store`; several GUI apps failed macOS code-signing/Gatekeeper checks from that location. Keep Home Manager focused on CLI/dev tools and user-scoped configuration.
 
-Ordinary Homebrew casks are declared in `nix/home/homebrew.nix`. Add app-bundle casks to the `userCasks` list, then run the standalone Home Manager activation:
+Ordinary Homebrew casks are declared in `nix/home/homebrew.nix`. The current working-tree user cask list includes ordinary app bundles plus explicit user-owned entries such as `claude`, `soundsource`, and `orbstack`; do not reclassify or remove those entries during audit-only work without an explicit approval step.
+
+Validate cask-list edits with the Home Manager activation package build before applying them:
+
+```bash
+nix --extra-experimental-features nix-command --extra-experimental-features flakes build /Users/hades/.config/nix#homeConfigurations.hades.activationPackage --impure
+```
+
+Activate only when the change should be applied and potential Homebrew cask state changes have been reviewed:
 
 ```bash
 home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
@@ -95,7 +110,7 @@ home-manager switch --extra-experimental-features nix-command --extra-experiment
 
 The module writes `~/.config/homebrew/Brewfile` and runs `brew bundle install --no-upgrade` as the user. Home Manager exports `HOMEBREW_CASK_OPTS=--appdir=/Users/hades/Applications` on macOS, so ordinary app-bundle casks install real app bundles under the user-owned `~/Applications` directory without requiring `sudo darwin-rebuild`. Casks that run package installers or install VPNs, system extensions, audio drivers, virtualization helpers, or other privileged components may still need admin privileges; keep those in `nix/hosts/mbp/homebrew.nix`.
 
-The user-level Brewfile does not run `brew bundle cleanup`. Cleanup is intentionally manual because Homebrew cleanup sees all installed casks, including privileged casks owned by the Darwin profile.
+The user-level Brewfile does not run `brew bundle cleanup`. Cleanup is intentionally manual because Homebrew cleanup sees all installed casks, including privileged casks owned by the Darwin profile. Removing a cask from the user-managed list can still uninstall a previously managed cask during Home Manager activation unless that cask remains explicitly exempted or is moved through an approved user/admin flow. For drift audits, compare declared lists and `brew list --cask` output as a report-only check; do not uninstall or cleanup as part of the audit.
 
 ## Codex CLI
 
@@ -304,7 +319,15 @@ This was needed when moving VS Code from Homebrew cask ownership to the Home Man
 
 ### NPM Deprecation Warnings During Rebuild
 
-`nix/home/node-packages.nix` manages selected global npm packages under `~/.local`. The activation checks whether each package is already installed before running `npm install --global`, so transitive npm warnings should appear only when a package is missing and installation actually runs.
+`nix/home/node-packages.nix` manages selected global npm packages under `~/.local`. It also writes `~/.npmrc` with `prefix=/Users/hades/.local` and `cache=/Users/hades/.cache/npm` so manual `npm install --global ...` commands do not try to write into the immutable Nix store. The activation checks whether each package is already installed before running `npm install --global`, so transitive npm warnings should appear only when a package is missing and installation actually runs.
+
+If `npm install -g ...` fails with `EACCES` while trying to create a directory under `/nix/store/...nodejs...`, confirm the npm prefix:
+
+```bash
+npm config get prefix
+```
+
+It should print `/Users/hades/.local` after Home Manager activation.
 
 ### Starship Looks Unchanged
 
@@ -321,7 +344,7 @@ echo $SHELL
 
 `nix/home/zellij.nix` installs a Home Manager-managed Zellij wrapper that normalizes `TMPDIR` back to the parent macOS temp directory before launching Zellij, sets `ZELLIJ_SOCKET_DIR` to a short per-user `/tmp` path so long session names do not exceed macOS socket path limits, downgrades Ghostty's outer `TERM` to `xterm-256color`, and drains a late DSR response on exit. `nix/home/ghostty.nix` writes `~/.config/ghostty/config` with `macos-option-as-alt = left` so the left Option key works as terminal Alt for Zellij bindings while the right Option key remains available for macOS character input.
 
-The managed Zellij config clears default bindings and restates the defaults that should remain, which intentionally removes Zellij's `Alt+Left`/`Alt+Right` bindings so Ghostty/shell word navigation keeps working. Use `Alt+Shift+f` for floating panes, `Alt+Shift+n` for a new tab, and `Ctrl+y` for zellij-forgot. The zellij-autolock plugin locks Zellij while commands such as Neovim, Git, fzf, zoxide, atuin, Claude, and Codex run in the focused pane. For Zellij prompts that show `<Del>`, use `Fn+Delete` on Mac keyboards; the key labeled Delete is normally Backspace, and Ghostty cannot bind `fn` directly. Keep future Zellij wrapper fixes in `nix/home/zellij.nix` and Ghostty config fixes in `nix/home/ghostty.nix`.
+The managed Zellij config clears default bindings and restates the defaults that should remain, which intentionally removes Zellij's `Alt+Left`/`Alt+Right` bindings so Ghostty/shell word navigation keeps working. `nix/home/zsh.nix` binds common `Option+Left` and `Option+Right` escape sequences, including Ghostty/Zellij modified arrows, to zsh word movement. If pressing `Option+Left` inserts `D` or `Option+Right` inserts `C`, zsh is receiving the final byte of an unbound arrow sequence and those `bindkey` entries should be checked after Home Manager activation. Use `Alt+Shift+f` for floating panes, `Alt+Shift+n` for a new tab, and `Ctrl+y` for zellij-forgot. The zellij-autolock plugin is defined but intentionally not loaded because upstream issue fresh2dev/zellij-autolock#20 reports that it can immediately undo manual `Ctrl+g` lock changes. For Zellij prompts that show `<Del>`, use `Fn+Delete` on Mac keyboards; the key labeled Delete is normally Backspace, and Ghostty cannot bind `fn` directly. Keep future Zellij wrapper fixes in `nix/home/zellij.nix`, Ghostty config fixes in `nix/home/ghostty.nix`, and shell word-navigation fixes in `nix/home/zsh.nix`.
 
 ### Secrets Are Placeholders
 

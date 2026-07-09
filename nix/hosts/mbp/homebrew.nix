@@ -37,6 +37,8 @@
     ];
 
     onActivation = {
+      # Keep Darwin activation from pruning user-managed Homebrew casks. The
+      # user-level Home Manager module owns ordinary app-bundle casks.
       cleanup = "none";
       autoUpdate = true;
       extraEnv = {

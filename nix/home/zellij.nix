@@ -296,14 +296,15 @@ in
           about location="zellij:about"
           autolock location="https://github.com/fresh2dev/zellij-autolock/releases/latest/download/zellij-autolock.wasm" {
               is_enabled true
-              triggers "nvim|vim|vi|view|git|fzf|zoxide|atuin|claude|codex"
+              triggers "nvim|vim|vi|view|git|fzf|zoxide|atuin"
               reaction_seconds "0.3"
           }
       }
 
       load_plugins {
           "zellij:link"
-          autolock
+          // zellij-autolock is intentionally not loaded: upstream issue #20
+          // reports that it can immediately undo manual Ctrl+g lock changes.
       }
 
       theme "default"

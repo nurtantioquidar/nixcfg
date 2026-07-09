@@ -4,6 +4,21 @@ This document classifies the macOS Nix configuration by privilege level. The goa
 
 The current macOS host is `darwinConfigurations.styx`. The repo also exposes `homeConfigurations.hades` for standalone user-level Home Manager activation.
 
+## Current Operating State
+
+Use this section as the current source of truth before reading the historical migration notes below.
+
+| Area | Current owner | Evidence | Operational rule |
+| --- | --- | --- | --- |
+| User packages, shells, Git, prompt, dotfiles, Codex CLI, npm globals | Home Manager under `nix/home` | `nix/home/home.nix`, `nix/home/codex.nix`, `nix/home/node-packages.nix` | Validate with the standalone `homeConfigurations.hades.activationPackage` build; activate with `home-manager switch` only when applying user state. |
+| Ordinary user Homebrew app casks | User Homebrew module | `nix/home/homebrew.nix` | Preserve the current cask membership during audit-only work. Removing a previously managed cask can uninstall it during Home Manager activation unless explicitly exempted. |
+| Current user cask baseline | User Homebrew module | `nix/home/homebrew.nix` | Current entries include `caffeine`, `iina`, `jetbrains-toolbox`, `rectangle`, `scroll-reverser`, `the-unarchiver`, `spotify`, `soundsource`, `orbstack`, and `claude`. Treat `claude`, `soundsource`, and `orbstack` as current working-tree state, not as automatic migration candidates. |
+| Privileged/system Homebrew casks | Darwin Homebrew module | `nix/hosts/mbp/homebrew.nix` | Keep VPN/security/system-helper casks on the Darwin/admin path unless a later explicit admin-window plan moves them. |
+| Homebrew bootstrap, pinned taps, Rosetta, cleanup policy | nix-darwin / nix-homebrew | `nix/hosts/mbp/homebrew.nix` | Keep `homebrew.onActivation.cleanup = "none"` unless intentionally pruning with explicit approval. |
+| System account, login shell registration, hostnames, Nix daemon/global settings | nix-darwin / NixOS | `nix/hosts/mbp/configuration.nix`, `nix/hosts/wsl/configuration.nix` | Requires the appropriate system rebuild path and should not be changed by user-level Home Manager activation. |
+
+For cask ownership drift checks, compare declared user casks, declared system casks, and observed `brew list --cask` output as a report-only audit. Do not run `brew uninstall`, `brew bundle cleanup`, `zap`, `home-manager switch`, or `sudo darwin-rebuild switch` as part of a documentation-only audit.
+
 ## Mental Model
 
 Use this rule of thumb:
@@ -122,7 +137,7 @@ For this migration, the cleaner VS Code target is package-only Home Manager owne
 - VS Code Settings Sync owns settings, extensions, keybindings, snippets, and profiles.
 - Do not import `nix/home/vscode.nix` as-is unless the intent changes, because it currently manages extensions and user settings declaratively.
 
-## Movable To Home Manager
+## Historical Migration Notes: Movable To Home Manager
 
 These are currently in the Darwin/system layer but can be moved to Home Manager with little or no functional loss.
 
@@ -210,11 +225,11 @@ Reason: Home Manager app links point into `/nix/store`, and several macOS GUI bu
 
 Tradeoff: privileged casks remain on the nix-darwin/Homebrew admin path. Ordinary app-bundle casks are user-installed under `/Users/hades/Applications` after Homebrew is bootstrapped. Casks that run package installers or install privileged components may still require admin privileges.
 
-Already moved or removed during the migration:
+Historical migration note: these were moved or removed during earlier migration phases. Cross-check this list against the current operating state above before treating it as desired state:
 
 - `codex` moved out of the nixpkgs package set and into `nix/home/codex.nix`, which installs the official standalone CLI under `~/.local/bin` and exposes `codex-upgrade` for user-level upgrades.
 - `ngrok` was already in Home Manager; the Homebrew cask was removed.
-- `claude` was removed instead of migrated because this pinned nixpkgs does not provide a clean `claude` or `claude-desktop` package.
+- `claude` was removed in an earlier migration phase because this pinned nixpkgs did not provide a clean `claude` or `claude-desktop` package. Current working-tree state now includes `claude` in the user Homebrew cask list; do not remove or reclassify it without an explicit follow-up decision.
 
 Not a clean Home Manager candidate in this pin:
 
@@ -369,26 +384,28 @@ Defined in `nix/hosts/mbp/homebrew.nix`:
 
 ```nix
 homebrew.onActivation = {
-  cleanup = "zap";
+  cleanup = "none";
   autoUpdate = true;
-  extraEnv.HOMEBREW_NO_INSTALL_FROM_API = "1";
+  extraEnv = {
+    HOMEBREW_NO_INSTALL_FROM_API = "1";
+  };
 };
 ```
 
-Reason: this mutates Homebrew state during nix-darwin activation. Keep this path focused on bootstrap, pinned taps, and privileged casks so ordinary app installs can remain user-owned.
+Reason: this mutates Homebrew state during nix-darwin activation. Keep this path focused on bootstrap, pinned taps, and privileged casks so ordinary app installs can remain user-owned. Keep `cleanup = "none"` unless an explicit pruning task is approved; cleanup can see casks owned by both the Darwin and user Homebrew profiles.
 
 ### Privileged Apps
 
-These should not be treated as purely user-level:
+These should not be treated as automatically movable to purely user-level ownership:
 
 - `pritunl`
 - `mullvad-vpn`
 - `expressvpn`
-- `soundsource`
-- `orbstack`
 - possibly `1password`
 
 Reason: these apps commonly install privileged helpers, LaunchDaemons, network extensions, audio/system extensions, VPN components, or files under `/Applications`, `/Library`, or `/var`.
+
+Current working-tree state declares `soundsource` and `orbstack` as user Homebrew casks. Treat them as future explicit privileged-helper audit candidates, not as automatic moves back to Darwin ownership during this pass.
 
 They should either:
 
@@ -563,16 +580,16 @@ home-manager switch --extra-experimental-features nix-command --extra-experiment
 
 ### Phase 5: Keep Privileged Apps System-Managed
 
-Do not move these in the first migration:
+Historical migration note: do not move these in the first migration:
 
 - `pritunl`
 - `mullvad-vpn`
 - `expressvpn`
-- `soundsource`
-- `orbstack`
 - possibly `1password`
 
 These may require privileged helpers, system extensions, LaunchDaemons, `/Applications`, `/Library`, or `/var` access.
+
+Current working-tree state declares `soundsource` and `orbstack` as user Homebrew casks. Preserve that current state for this pass and audit any future reclassification separately.
 
 ### Phase 6: Final Admin Window
 
@@ -727,28 +744,28 @@ Removed these Homebrew brews after confirming Home Manager commands resolve from
 - `bun`
 - `cloudflared`
 
-These casks were temporarily removed during Home Manager GUI app testing, then restored to Homebrew after code-signing/Gatekeeper issues appeared:
+Historical migration note: these casks were temporarily removed during Home Manager GUI app testing, then restored to Homebrew after code-signing/Gatekeeper issues appeared:
 
 - `visual-studio-code`
 - `chatgpt`
 - `slack`
 
-This cask was removed because Home Manager owns the replacement CLI package:
+Historical migration note: this cask was removed because Home Manager owns the replacement CLI package:
 
 - `codex`
 
-This cask was removed because the app is no longer wanted:
+Historical migration note: this cask was removed during an earlier migration because the app was not wanted at that time. Current working-tree state now declares it as a user-owned Homebrew cask in `nix/home/homebrew.nix`; preserve it during audit-only work unless a follow-up task explicitly approves a state-changing removal or reclassification:
 
 - `claude`
 
-The VS Code cask removal required clearing immutable flags first:
+Historical command record: the VS Code cask removal required clearing immutable flags first:
 
 ```bash
 sudo chflags -R nouchg /Applications/Visual\ Studio\ Code.app /opt/homebrew/Caskroom/visual-studio-code
 brew uninstall --cask --force visual-studio-code
 ```
 
-The Claude Desktop cask removal needed the same immutable-flag cleanup pattern after Homebrew hit Electron framework symlink/chflags backup errors:
+Historical command record: the earlier Claude Desktop cask removal needed the same immutable-flag cleanup pattern after Homebrew hit Electron framework symlink/chflags backup errors. Do not rerun this during documentation or drift-audit work:
 
 ```bash
 sudo chflags -R nouchg /Applications/Claude.app /opt/homebrew/Caskroom/claude
@@ -760,9 +777,9 @@ Keep these Homebrew casks system/admin-managed for now:
 - `pritunl`
 - `mullvad-vpn`
 - `expressvpn`
-- `soundsource`
-- `orbstack`
 - `1password`
+
+Current working-tree state declares `soundsource`, `orbstack`, and `claude` in the user Homebrew cask list. Treat that as the current desired state for this pass, not as an automatic admin/system migration.
 
 Keep these Homebrew-managed until migrated or intentionally left as user-installed casks:
 
@@ -798,4 +815,4 @@ Final outcome:
 - `codex` resolves from `~/.local/bin/codex` after `nix/home/codex.nix` installs OpenAI's standalone CLI.
 - `codex-upgrade` resolves from the Home Manager profile and reruns the official standalone installer without sudo.
 - `ngrok` resolves from the Home Manager profile.
-- `/Applications/Claude.app` and `/opt/homebrew/Caskroom/claude` are gone.
+- Historical outcome at the time: `/Applications/Claude.app` and `/opt/homebrew/Caskroom/claude` were gone. Current desired state is governed by the Current Operating State section above, which declares `claude` as a user Homebrew cask in `nix/home/homebrew.nix`.

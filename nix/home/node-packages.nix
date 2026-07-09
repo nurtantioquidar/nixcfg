@@ -1,11 +1,13 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 
 let
   nodejs = pkgs.nodejs_24;
-  npmPrefix = "$HOME/.local";
+  npmPrefix = "${config.home.homeDirectory}/.local";
+  npmCache = "${config.home.homeDirectory}/.cache/npm";
 
   globalPackages = [
     "@steipete/oracle"
+    "oh-my-codex"
   ];
 
   packageArgs = lib.concatStringsSep " " (map lib.escapeShellArg globalPackages);
@@ -15,14 +17,22 @@ in
     nodejs
   ];
 
+  home.file.".npmrc".text = ''
+    prefix=${npmPrefix}
+    cache=${npmCache}
+  '';
+
+  # Keep global npm installs user-writable. Both .npmrc and the activation
+  # environment point npm at ~/.local so manual `npm install --global` and this
+  # managed installer do not try to write into the immutable Nix store.
   home.activation.installNodePackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     set -euo pipefail
 
     export PATH="${nodejs}/bin:${pkgs.coreutils}/bin:$PATH"
-    export npm_config_cache="$HOME/.cache/npm"
+    export npm_config_cache="${npmCache}"
     export npm_config_prefix="${npmPrefix}"
 
-    $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "${npmPrefix}" "$HOME/.cache/npm"
+    $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "${npmPrefix}" "${npmCache}"
 
     missing_packages=()
     for package in ${packageArgs}; do
