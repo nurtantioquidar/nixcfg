@@ -46,6 +46,7 @@ in
       delve
       mockgen
       google-cloud-sdk
+      grafana-loki
     ] ++ lib.optionals pkgs.stdenv.isDarwin [
       act
       argocd
