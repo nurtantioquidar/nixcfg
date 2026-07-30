@@ -6,15 +6,28 @@ let
   npmCache = "${config.home.homeDirectory}/.cache/npm";
 
   globalPackages = [
-    "@steipete/oracle"
     "oh-my-codex"
+    "opencode-ai"
   ];
 
   packageArgs = lib.concatStringsSep " " (map lib.escapeShellArg globalPackages);
+  latestPackageArgs = lib.concatStringsSep " " (map (package: lib.escapeShellArg "${package}@latest") globalPackages);
+
+  nodePackagesUpgrade = pkgs.writeShellScriptBin "node-packages-upgrade" ''
+    set -eu
+
+    export PATH="${nodejs}/bin:${pkgs.coreutils}/bin:$PATH"
+    export npm_config_cache="${npmCache}"
+    export npm_config_prefix="${npmPrefix}"
+
+    ${pkgs.coreutils}/bin/mkdir -p "${npmPrefix}" "${npmCache}"
+    exec ${nodejs}/bin/npm install --global --no-audit --no-fund --prefix "${npmPrefix}" ${latestPackageArgs}
+  '';
 in
 {
   home.packages = [
     nodejs
+    nodePackagesUpgrade
   ];
 
   home.file.".npmrc".text = ''

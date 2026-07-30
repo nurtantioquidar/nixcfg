@@ -15,6 +15,7 @@ in
     ./claude-code.nix
     ./codex.nix
     ./ghostty.nix
+    ./herdr.nix
     ./homebrew.nix
     ./node-packages.nix
     ./ssh.nix
@@ -32,6 +33,8 @@ in
       curl
       coreutils
       jq
+      nixpkgs-fmt
+      geist-font
       nerd-fonts.fira-code
       nerd-fonts.jetbrains-mono
       ripgrep
@@ -67,10 +70,10 @@ in
       woff2
     ];
 
-    # Ensure ~/.local/bin is on PATH for all processes (not just interactive shells)
-    # This fixes warnings from tools like `uv` that check PATH in non-interactive contexts
+    # Ensure user-installed tools are on PATH for all processes (not just interactive shells).
+    # This fixes warnings from tools like `uv` and exposes binaries installed with `go install`.
     sessionVariables = {
-      PATH = "$HOME/.local/bin:$PATH";
+      PATH = "$HOME/go/bin:$HOME/.local/bin:$PATH";
     } // lib.optionalAttrs pkgs.stdenv.isDarwin {
       EDITOR = "zed --wait";
       VISUAL = "zed --wait";

@@ -12,6 +12,11 @@
 
     flake-utils.url = "github:numtide/flake-utils";
 
+    herdr = {
+      url = "github:ogulcancelik/herdr/v0.7.3";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
 
     homebrew-cask = {
@@ -21,6 +26,11 @@
 
     homebrew-cmux = {
       url = "git+https://github.com/manaflow-ai/homebrew-cmux.git";
+      flake = false;
+    };
+
+    homebrew-tinycast = {
+      url = "github:abue-ammar/homebrew-tinycast";
       flake = false;
     };
 
@@ -35,7 +45,7 @@
 
   outputs = inputs @ { self, flake-utils, nixpkgs, rust-overlay, ... }:
     let
-      overlays = [ (import rust-overlay) (import ./nix/overlays) ];
+      overlays = [ (import rust-overlay) inputs.herdr.overlays.default (import ./nix/overlays) ];
 
       nixpkgsConfig = {
         inherit overlays;

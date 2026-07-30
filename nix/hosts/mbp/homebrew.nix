@@ -13,6 +13,7 @@
     taps = {
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
       "manaflow-ai/homebrew-cmux" = inputs.homebrew-cmux;
+      "abue-ammar/homebrew-tinycast" = inputs.homebrew-tinycast;
     };
   };
 
@@ -34,6 +35,7 @@
       "mullvad-vpn"
       "1password"
       "expressvpn"
+      "cloudflare-warp"
     ];
 
     onActivation = {

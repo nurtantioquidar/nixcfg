@@ -16,7 +16,9 @@ let
     "spotify"
     "soundsource"
     "orbstack"
+    "obsidian"
     "claude"
+    "abue-ammar/tinycast/tinycast"
   ];
 
   # These were briefly user-managed during the Homebrew split, but they are
@@ -28,6 +30,7 @@ let
 
   brewfile = pkgs.writeText "user-homebrew-Brewfile" ''
     tap "homebrew/cask"
+    tap "abue-ammar/tinycast"
 
     ${lib.concatMapStringsSep "\n" (cask: ''cask "${cask}"'') userCasks}
   '';

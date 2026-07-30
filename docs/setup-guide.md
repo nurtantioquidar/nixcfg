@@ -122,6 +122,17 @@ codex-upgrade
 
 `codex-upgrade` reruns OpenAI's standalone installer with `CODEX_NON_INTERACTIVE=1`, matching the official macOS/Linux install and upgrade path documented at <https://developers.openai.com/codex/cli>. This keeps Codex CLI upgrades out of the sudo or Homebrew path.
 
+## Herdr
+
+Herdr is installed for macOS and WSL through the pinned upstream `herdr` flake input and the shared `nix/home/herdr.nix` module. Upgrade the pin and rebuild the standalone Home Manager profile with:
+
+```bash
+nix flake update herdr
+home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
+```
+
+Start or reattach to the default session with `herdr`. Because Nix owns the binary, use the flake update workflow rather than `herdr update`.
+
 ## VS Code
 
 VS Code Settings Sync is the source of truth for settings, extensions, keybindings, snippets, and profiles.
@@ -319,7 +330,11 @@ This was needed when moving VS Code from Homebrew cask ownership to the Home Man
 
 ### NPM Deprecation Warnings During Rebuild
 
-`nix/home/node-packages.nix` manages selected global npm packages under `~/.local`. It also writes `~/.npmrc` with `prefix=/Users/hades/.local` and `cache=/Users/hades/.cache/npm` so manual `npm install --global ...` commands do not try to write into the immutable Nix store. The activation checks whether each package is already installed before running `npm install --global`, so transitive npm warnings should appear only when a package is missing and installation actually runs.
+`nix/home/node-packages.nix` manages selected global npm packages under `~/.local`. It also writes `~/.npmrc` with `prefix=/Users/hades/.local` and `cache=/Users/hades/.cache/npm` so manual `npm install --global ...` commands do not try to write into the immutable Nix store. The activation checks whether each package is already installed before running `npm install --global`, so transitive npm warnings should appear only when a package is missing and installation actually runs. Existing packages are intentionally not upgraded during activation because that would make every Home Manager switch depend on npm and network availability. Upgrade all packages declared by the module explicitly with:
+
+```bash
+node-packages-upgrade
+```
 
 If `npm install -g ...` fails with `EACCES` while trying to create a directory under `/nix/store/...nodejs...`, confirm the npm prefix:
 
