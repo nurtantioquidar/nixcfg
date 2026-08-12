@@ -19,6 +19,7 @@ let
     "obsidian"
     "claude"
     "abue-ammar/tinycast/tinycast"
+    "nikitabobko/tap/aerospace"
   ];
 
   # These were briefly user-managed during the Homebrew split, but they are
@@ -31,6 +32,7 @@ let
   brewfile = pkgs.writeText "user-homebrew-Brewfile" ''
     tap "homebrew/cask"
     tap "abue-ammar/tinycast"
+    tap "nikitabobko/tap"
 
     ${lib.concatMapStringsSep "\n" (cask: ''cask "${cask}"'') userCasks}
   '';
@@ -47,15 +49,14 @@ in
   config = lib.mkIf pkgs.stdenv.isDarwin {
     home.file.".config/homebrew/Brewfile".source = brewfile;
 
-    home.sessionVariables = {
-      HOMEBREW_BUNDLE_FILE_GLOBAL = "$HOME/.config/homebrew/Brewfile";
-      HOMEBREW_CASK_OPTS = "--appdir=/Users/hades/Applications";
-    };
+    home.sessionVariables.HOMEBREW_BUNDLE_FILE_GLOBAL = "$HOME/.config/homebrew/Brewfile";
 
     home.activation.installUserHomebrewCasks = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       if [ -x /opt/homebrew/bin/brew ]; then
         state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/home-manager-homebrew"
         managed_casks="$state_dir/managed-casks"
+        # Scope the custom app directory to this activation. Exporting it as a
+        # session variable also redirects Darwin-owned system casks here.
         export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
         export HOMEBREW_NO_AUTO_UPDATE=1
 

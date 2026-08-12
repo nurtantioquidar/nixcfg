@@ -11,7 +11,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://github.com/kovidgoyal/calibre/releases/download/v${version}/calibre-${version}.dmg";
-    hash = "sha256-euFJgJzslirAALPaVaNY8LNNoIKRsJaD9gl1nVoRWzU=";
+    hash = "sha256-ABvm7XDYrP15P6fYyV6lAEWr7a8OdWsg5WQnWgsKdmc=";
   };
 
   sourceRoot = ".";

@@ -14,6 +14,7 @@ in
     ./bash.nix
     ./claude-code.nix
     ./codex.nix
+    ./aerospace.nix
     ./ghostty.nix
     ./herdr.nix
     ./homebrew.nix

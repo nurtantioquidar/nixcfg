@@ -7,24 +7,28 @@
 }:
 
 buildPythonPackage rec {
-  version = "1.2.1";
-  format = "setuptools";
+  version = "2.1.0";
+  pyproject = true;
   pname = "beanprice";
 
   disabled = !isPy3k;
 
   src = fetchPypi {
     inherit pname version;
-    hash = "sha256-0/W1q25z6xNjhb7mZFpJUZ6TVNNA1BK341gOxlpOGVc=";
+    hash = "sha256-2Q0mZB97rthEPN/bVUXDj40B+XYE7UrUFzsCNZiYKxM=";
   };
+
+  build-system = with python3Packages; [ setuptools ];
 
   # Tests require files not included in the PyPI archive.
   doCheck = false;
 
   propagatedBuildInputs = with python3Packages; [
-    python
-    python-dateutil
     beancount
+    curl-cffi
+    diskcache
+    python-dateutil
+    requests
   ];
 
   meta = with lib; {

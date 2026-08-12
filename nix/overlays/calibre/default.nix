@@ -7,7 +7,9 @@
 let
   pname = "calibre";
 
-  version = "7.23.0";
+  # The Darwin package uses Calibre's notarized upstream app bundle. Keep the
+  # older Linux recipe until its downstream Debian patches are refreshed.
+  version = if stdenv.hostPlatform.isDarwin then "9.13.0" else "7.23.0";
 
   meta = with lib; {
     homepage = "https://calibre-ebook.com";

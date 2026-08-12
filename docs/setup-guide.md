@@ -291,6 +291,8 @@ To cover both cases, this repo pins `github:homebrew/homebrew-cask` as the `home
 
 Third-party taps that provide casks follow the same split. For example, cmux uses the Brewfile tap alias `manaflow-ai/cmux`, while `nix-homebrew.taps."manaflow-ai/homebrew-cmux"` points at the pinned `git+https://github.com/manaflow-ai/homebrew-cmux.git` flake input.
 
+AeroSpace is fully user-managed: `nix/home/homebrew.nix` installs the official `nikitabobko/tap/aerospace` cask and `nix/home/aerospace.nix` manages `~/.config/aerospace/aerospace.toml`, so setup and upgrades do not require `sudo darwin-rebuild` or admin access. The managed bindings use `Alt+h/j/k/l` for focus, `Alt+Shift+h/j/k/l` for moves, and `Alt+1` through `Alt+9` for workspaces; Option+Arrow remains available for shell word navigation.
+
 When adding a new cask that exists in Homebrew's API but fails during activation, check both paths:
 
 ```bash
