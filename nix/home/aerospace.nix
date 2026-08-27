@@ -61,8 +61,11 @@
       alt-shift-8 = 'move-node-to-workspace 8'
       alt-shift-9 = 'move-node-to-workspace 9'
 
-      alt-tab = 'workspace-back-and-forth'
-      alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+      # Cycle forward through windows in the current workspace
+      alt-tab = 'focus --wrap-around dfs-next'
+
+      # Cycle backward through windows in the current workspace
+      alt-shift-tab = 'focus --wrap-around dfs-prev'
       alt-shift-semicolon = 'mode service'
 
       [mode.service.binding]
