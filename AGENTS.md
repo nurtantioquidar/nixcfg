@@ -74,7 +74,7 @@ Homebrew bootstrap, pinned taps, and privileged casks are managed through `nix-h
 - Keep `homebrew/cask` in `homebrew.taps`.
 - Keep `inputs.homebrew-cask` exposed through `nix-homebrew.taps."homebrew/homebrew-cask"`.
 - Keep `manaflow-ai/cmux` in `homebrew.taps` and expose `inputs.homebrew-cmux` through `nix-homebrew.taps."manaflow-ai/homebrew-cmux"` for the cmux cask.
-- Keep Tinycast user-managed through `nix/home/homebrew.nix`; expose `inputs.homebrew-tinycast` through `nix-homebrew.taps."abue-ammar/homebrew-tinycast"` for its pinned third-party cask.
+- Keep Tinycast user-managed through `nix/home/homebrew.nix`; expose `inputs.homebrew-tinycast` through `nix-homebrew.taps."abue-ammar/homebrew-tinycast"` for its pinned third-party cask. Trust only the exact Tinycast cask during activation, and keep launcher preferences in `nix/home/tinycast.nix` so the user-owned Claude app wins duplicate bundle-ID resolution.
 - Keep AeroSpace fully user-managed through its official cask and tap in `nix/home/homebrew.nix`, with its configuration in `nix/home/aerospace.nix`; it must not require `sudo darwin-rebuild` or admin access.
 - Keep ordinary app-bundle casks out of Darwin `homebrew.casks`; declare them in `nix/home/homebrew.nix` instead. Home Manager writes a user Brewfile and runs `brew bundle install --no-upgrade` with `HOMEBREW_CASK_OPTS=--appdir=/Users/hades/Applications`. Casks with package installers or privileged components may still need the admin path.
 - Keep `HOMEBREW_CASK_OPTS` scoped to the user Home Manager activation rather than exporting it as a session variable. A global value also redirects Darwin-managed casks such as 1Password into the user Applications directory; 1Password belongs at `/Applications/1Password.app`.

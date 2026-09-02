@@ -3,6 +3,11 @@ _:
   programs.zsh = {
     enable = true;
 
+    profileExtra = ''
+      # OrbStack command-line tools and integration
+      source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || true
+    '';
+
     initContent = ''
       if [ -e "$HOME/.env" ]; then
         source "$HOME/.env"

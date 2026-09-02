@@ -9,8 +9,8 @@ _:
       "/Users/hades/.colima/ssh_config"
     ];
 
-    matchBlocks."*" = {
-      identityAgent = "~/Library/Group\\ Containers/2BUA8C4S2C.com.1password/t/agent.sock";
+    settings."*" = {
+      IdentityAgent = "~/Library/Group\\ Containers/2BUA8C4S2C.com.1password/t/agent.sock";
     };
   };
 }

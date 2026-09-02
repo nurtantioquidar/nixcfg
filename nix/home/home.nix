@@ -4,6 +4,8 @@ let
   vscodeCode = pkgs.writeShellScriptBin "code" ''
     exec "/Users/hades/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" "$@"
   '';
+
+  rustToolchain = import ../lib/rust-toolchain.nix { inherit pkgs; };
 in
 {
   imports = [
@@ -18,6 +20,7 @@ in
     ./ghostty.nix
     ./herdr.nix
     ./homebrew.nix
+    ./tinycast.nix
     ./node-packages.nix
     ./ssh.nix
     ./nvim.nix
@@ -46,9 +49,11 @@ in
       gopls
       delve
       mockgen
+      rustToolchain
       google-cloud-sdk
       grafana-loki
     ] ++ lib.optionals pkgs.stdenv.isDarwin [
+      _1password-cli
       act
       argocd
       bun
@@ -76,6 +81,7 @@ in
     # This fixes warnings from tools like `uv` and exposes binaries installed with `go install`.
     sessionVariables = {
       PATH = "$HOME/go/bin:$HOME/.local/bin:$PATH";
+      RUST_SRC_PATH = "${rustToolchain}/lib/rustlib/src/rust/library";
     } // lib.optionalAttrs pkgs.stdenv.isDarwin {
       EDITOR = "zed --wait";
       VISUAL = "zed --wait";

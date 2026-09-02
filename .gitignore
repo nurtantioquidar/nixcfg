@@ -1,8 +1,13 @@
-.direnv
+# Local development state
+/.direnv/
+/result
+/.omx/
+/.claude/settings.local.json
+.DS_Store
 
+# Local environment files
 .env*
 !.envrc
-result
 
 # Personal secrets (git user info, SSH keys, etc.)
 secrets.nix

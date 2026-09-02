@@ -7,26 +7,26 @@ let
   # that cask during activation unless it remains listed in systemCasks or is
   # moved through an explicit user/admin flow.
   userCasks = [
+    "abue-ammar/tinycast/tinycast"
     "caffeine"
+    "claude"
     "iina"
     "jetbrains-toolbox"
+    "nikitabobko/tap/aerospace"
+    "obsidian"
+    "orbstack"
     "rectangle"
     "scroll-reverser"
-    "the-unarchiver"
-    "spotify"
     "soundsource"
-    "orbstack"
-    "obsidian"
-    "claude"
-    "abue-ammar/tinycast/tinycast"
-    "nikitabobko/tap/aerospace"
+    "spotify"
+    "the-unarchiver"
   ];
 
   # These were briefly user-managed during the Homebrew split, but they are
   # installer/pkg casks that do not honor the user appdir cleanly.
   systemCasks = [
-    "mullvad-vpn"
     "expressvpn"
+    "mullvad-vpn"
   ];
 
   brewfile = pkgs.writeText "user-homebrew-Brewfile" ''
@@ -47,36 +47,42 @@ let
 in
 {
   config = lib.mkIf pkgs.stdenv.isDarwin {
-    home.file.".config/homebrew/Brewfile".source = brewfile;
+    home = {
+      file.".config/homebrew/Brewfile".source = brewfile;
 
-    home.sessionVariables.HOMEBREW_BUNDLE_FILE_GLOBAL = "$HOME/.config/homebrew/Brewfile";
+      sessionVariables.HOMEBREW_BUNDLE_FILE_GLOBAL = "$HOME/.config/homebrew/Brewfile";
 
-    home.activation.installUserHomebrewCasks = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      if [ -x /opt/homebrew/bin/brew ]; then
-        state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/home-manager-homebrew"
-        managed_casks="$state_dir/managed-casks"
-        # Scope the custom app directory to this activation. Exporting it as a
-        # session variable also redirects Darwin-owned system casks here.
-        export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
-        export HOMEBREW_NO_AUTO_UPDATE=1
+      activation.installUserHomebrewCasks = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        if [ -x /opt/homebrew/bin/brew ]; then
+          state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/home-manager-homebrew"
+          managed_casks="$state_dir/managed-casks"
+          # Scope the custom app directory to this activation. Exporting it as a
+          # session variable also redirects Darwin-owned system casks here.
+          export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
+          export HOMEBREW_NO_AUTO_UPDATE=1
 
-        if [ -f "$managed_casks" ]; then
-          while IFS= read -r cask; do
-            # Prune only casks this Home Manager module previously recorded as
-            # managed, and never prune entries that are now classified as
-            # system/admin casks.
-            if [ -n "$cask" ] && ! ${pkgs.gnugrep}/bin/grep -qxF "$cask" "${userCasksList}" && ! ${pkgs.gnugrep}/bin/grep -qxF "$cask" "${systemCasksList}"; then
-              if /opt/homebrew/bin/brew list --cask "$cask" >/dev/null 2>&1; then
-                $DRY_RUN_CMD /opt/homebrew/bin/brew uninstall --cask "$cask"
+          # Tinycast is self-signed. Trust only its exact cask, not the full
+          # third-party tap that provides it.
+          $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask abue-ammar/tinycast/tinycast
+
+          if [ -f "$managed_casks" ]; then
+            while IFS= read -r cask; do
+              # Prune only casks this Home Manager module previously recorded as
+              # managed, and never prune entries that are now classified as
+              # system/admin casks.
+              if [ -n "$cask" ] && ! ${pkgs.gnugrep}/bin/grep -qxF "$cask" "${userCasksList}" && ! ${pkgs.gnugrep}/bin/grep -qxF "$cask" "${systemCasksList}"; then
+                if /opt/homebrew/bin/brew list --cask "$cask" >/dev/null 2>&1; then
+                  $DRY_RUN_CMD /opt/homebrew/bin/brew uninstall --cask "$cask"
+                fi
               fi
-            fi
-          done < "$managed_casks"
-        fi
+            done < "$managed_casks"
+          fi
 
-        $DRY_RUN_CMD /opt/homebrew/bin/brew bundle install --file "${brewfile}" --no-upgrade
-        $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$state_dir"
-        $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0644 "${userCasksList}" "$managed_casks"
-      fi
-    '';
+          $DRY_RUN_CMD /opt/homebrew/bin/brew bundle install --file "${brewfile}" --no-upgrade
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p "$state_dir"
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0644 "${userCasksList}" "$managed_casks"
+        fi
+      '';
+    };
   };
 }

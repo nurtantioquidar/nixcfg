@@ -138,6 +138,7 @@
     } // flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system overlays; };
+        rustToolchain = import ./nix/lib/rust-toolchain.nix { inherit pkgs; };
       in
       {
         legacyPackages = pkgs;
@@ -147,11 +148,10 @@
             nil
             statix
             nixpkgs-fmt
-            rustc
-            cargo
-            rustfmt
-            clippy
+            rustToolchain
           ];
+
+          RUST_SRC_PATH = "${rustToolchain}/lib/rustlib/src/rust/library";
         };
       }
     );

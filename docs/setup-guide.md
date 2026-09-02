@@ -110,6 +110,8 @@ home-manager switch --extra-experimental-features nix-command --extra-experiment
 
 The module writes `~/.config/homebrew/Brewfile` and runs `brew bundle install --no-upgrade` as the user. Home Manager exports `HOMEBREW_CASK_OPTS=--appdir=/Users/hades/Applications` on macOS, so ordinary app-bundle casks install real app bundles under the user-owned `~/Applications` directory without requiring `sudo darwin-rebuild`. Casks that run package installers or install VPNs, system extensions, audio drivers, virtualization helpers, or other privileged components may still need admin privileges; keep those in `nix/hosts/mbp/homebrew.nix`.
 
+Tinycast is installed from its pinned third-party cask. The activation trusts only `abue-ammar/tinycast/tinycast`, rather than the entire tap. `nix/home/tinycast.nix` manages its launcher search scopes and places `~/Applications/Claude.app` before `/Applications`, ensuring Tinycast keeps the user-owned, upgradeable Claude Desktop bundle when both copies share the same bundle identifier.
+
 The user-level Brewfile does not run `brew bundle cleanup`. Cleanup is intentionally manual because Homebrew cleanup sees all installed casks, including privileged casks owned by the Darwin profile. Removing a cask from the user-managed list can still uninstall a previously managed cask during Home Manager activation unless that cask remains explicitly exempted or is moved through an approved user/admin flow. For drift audits, compare declared lists and `brew list --cask` output as a report-only check; do not uninstall or cleanup as part of the audit.
 
 ## Codex CLI
@@ -121,6 +123,18 @@ codex-upgrade
 ```
 
 `codex-upgrade` reruns OpenAI's standalone installer with `CODEX_NON_INTERACTIVE=1`, matching the official macOS/Linux install and upgrade path documented at <https://developers.openai.com/codex/cli>. This keeps Codex CLI upgrades out of the sudo or Homebrew path.
+
+## Rust Development
+
+The shared Home Manager profile installs the latest stable Rust toolchain from the pinned `rust-overlay` flake input. It includes `rustc`, Cargo, Clippy, rustfmt, `rust-analyzer`, the standard-library source, and API documentation. `RUST_SRC_PATH` is configured for tools that need to inspect the standard library.
+
+Because the toolchain is in `home.packages`, it is available to interactive shells and coding agents after activating Home Manager:
+
+```bash
+home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
+```
+
+The repository's default `nix develop` shell uses the same toolchain definition. Update the pinned Rust release with the normal flake input update workflow rather than `rustup`.
 
 ## Herdr
 
@@ -213,6 +227,26 @@ nix-instantiate --eval -E 'import /Users/hades/.config/nix-secrets/git-secrets.n
 # WSL:
 nix-instantiate --eval -E 'import /home/hades/.config/nix-secrets/git-secrets.nix'
 ```
+
+## 1Password CLI
+
+The macOS Home Manager profile installs the 1Password CLI as `op`. The Nix package also provides Bash, Fish, and Zsh completions.
+
+After activating Home Manager, enable biometric authentication through the existing 1Password desktop app:
+
+1. Open and unlock 1Password.
+2. Go to **Settings > Developer**.
+3. Enable **Integrate with 1Password CLI**.
+4. Enable Touch ID in 1Password if it is not already enabled.
+
+Verify the installation and authorize access from the desktop app:
+
+```bash
+op --version
+op vault list
+```
+
+If multiple accounts are configured in the desktop app, run `op signin` to select one.
 
 ## 1Password Git Signing
 
