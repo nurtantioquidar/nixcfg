@@ -145,7 +145,11 @@ nix flake update herdr
 home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
 ```
 
-Start or reattach to the default session with `herdr`. Because Nix owns the binary, use the flake update workflow rather than `herdr update`.
+Start or reattach to the default session with `herdr`. Because Nix owns the binary and
+`~/.config/herdr/config.toml`, use the flake update and Home Manager workflows rather than
+`herdr update` or editing that file directly. Mouse capture is disabled because Herdr can leave SGR
+mouse reporting enabled after detach; keyboard navigation remains available and the outer terminal
+handles mouse selection normally.
 
 ## VS Code
 

@@ -61,9 +61,10 @@ in
           export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
           export HOMEBREW_NO_AUTO_UPDATE=1
 
-          # Tinycast is self-signed. Trust only its exact cask, not the full
-          # third-party tap that provides it.
+          # Trust only the exact third-party casks Home Manager installs, not
+          # either full tap.
           $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask abue-ammar/tinycast/tinycast
+          $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask nikitabobko/tap/aerospace
 
           if [ -f "$managed_casks" ]; then
             while IFS= read -r cask; do
