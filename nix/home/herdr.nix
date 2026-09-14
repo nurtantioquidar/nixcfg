@@ -1,8 +1,23 @@
 { pkgs, ... }:
 
+let
+  herdrWithTerminalCleanup = pkgs.writeShellScriptBin "herdr" ''
+    cleanup_mouse_reporting() {
+      if [[ -t 1 ]]; then
+        # Herdr clears these before leaving the alternate screen. Some
+        # terminals restore the saved modes afterwards, so clear them again.
+        printf '\033[?1006l\033[?1016l\033[?1015l\033[?1005l\033[?1003l\033[?1002l\033[?1000l'
+      fi
+    }
+
+    trap cleanup_mouse_reporting EXIT
+    ${pkgs.herdr}/bin/herdr "$@"
+    exit $?
+  '';
+in
 {
   home.packages = [
-    pkgs.herdr
+    herdrWithTerminalCleanup
   ];
 
   xdg.configFile."herdr/config.toml" = {
@@ -12,9 +27,7 @@
 
       [ui]
       show_agent_labels_on_pane_borders = true
-      # Herdr's mouse-capture mode can survive detach and send SGR mouse
-      # reports into the parent shell. Leave mouse handling to the terminal.
-      mouse_capture = false
+      mouse_capture = true
 
       [theme]
       name = "rose-pine"

@@ -147,9 +147,10 @@ home-manager switch --extra-experimental-features nix-command --extra-experiment
 
 Start or reattach to the default session with `herdr`. Because Nix owns the binary and
 `~/.config/herdr/config.toml`, use the flake update and Home Manager workflows rather than
-`herdr update` or editing that file directly. Mouse capture is disabled because Herdr can leave SGR
-mouse reporting enabled after detach; keyboard navigation remains available and the outer terminal
-handles mouse selection normally.
+`herdr update` or editing that file directly. Mouse capture remains enabled for click-based pane
+navigation. The Home Manager package is a thin wrapper around the pinned binary that clears host
+mouse-reporting modes after Herdr exits, avoiding raw SGR coordinates in the parent shell without
+disabling Herdr's mouse UI.
 
 ## VS Code
 
