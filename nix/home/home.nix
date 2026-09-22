@@ -20,6 +20,7 @@ in
     ./ghostty.nix
     ./herdr.nix
     ./homebrew.nix
+    ./zed.nix
     ./tinycast.nix
     ./node-packages.nix
     ./ssh.nix
@@ -38,7 +39,6 @@ in
       coreutils
       jq
       nixpkgs-fmt
-      geist-font
       nerd-fonts.fira-code
       nerd-fonts.jetbrains-mono
       ripgrep
