@@ -2,7 +2,9 @@
 
 This document classifies the macOS Nix configuration by privilege level. The goal is to identify what can be managed as the normal `hades` user with Home Manager, and what still requires temporary admin access with `sudo darwin-rebuild`.
 
-The current macOS host is `darwinConfigurations.styx`. The repo also exposes `homeConfigurations.hades` for standalone user-level Home Manager activation.
+The personal MacBook Pro is `darwinConfigurations.styx`; the company MacBook
+Air is `darwinConfigurations.MAC-YP2JJ9KNWT`. The repo also exposes
+`homeConfigurations.hades` for standalone user-level Home Manager activation.
 
 ## Current Operating State
 
@@ -13,9 +15,9 @@ Use this section as the current source of truth before reading the historical mi
 | User packages, shells, Git, prompt, dotfiles, Codex CLI, npm globals | Home Manager under `nix/home` | `nix/home/home.nix`, `nix/home/codex.nix`, `nix/home/node-packages.nix` | Validate with the standalone `homeConfigurations.hades.activationPackage` build; activate with `home-manager switch` only when applying user state. |
 | Ordinary user Homebrew app casks | User Homebrew module | `nix/home/homebrew.nix` | Preserve the current cask membership during audit-only work. Removing a previously managed cask can uninstall it during Home Manager activation unless explicitly exempted. |
 | Current user cask baseline | User Homebrew module | `nix/home/homebrew.nix` | Current entries include `caffeine`, `iina`, `jetbrains-toolbox`, `rectangle`, `scroll-reverser`, `the-unarchiver`, `spotify`, `soundsource`, `orbstack`, and `claude`. Treat `claude`, `soundsource`, and `orbstack` as current working-tree state, not as automatic migration candidates. |
-| Privileged/system Homebrew casks | Darwin Homebrew module | `nix/hosts/mbp/homebrew.nix` | Keep VPN/security/system-helper casks on the Darwin/admin path unless a later explicit admin-window plan moves them. |
-| Homebrew bootstrap, pinned taps, Rosetta, cleanup policy | nix-darwin / nix-homebrew | `nix/hosts/mbp/homebrew.nix` | Keep `homebrew.onActivation.cleanup = "none"` unless intentionally pruning with explicit approval. |
-| System account, login shell registration, hostnames, Nix daemon/global settings | nix-darwin / NixOS | `nix/hosts/mbp/configuration.nix`, `nix/hosts/wsl/configuration.nix` | Requires the appropriate system rebuild path and should not be changed by user-level Home Manager activation. |
+| Privileged/system Homebrew casks | Darwin Homebrew module | `nix/hosts/mbp/homebrew.nix`, `nix/hosts/mba/homebrew.nix` | Keep VPN/security/system-helper casks on the Darwin/admin path unless a later explicit admin-window plan moves them. |
+| Homebrew bootstrap, pinned taps, Rosetta, cleanup policy | nix-darwin / nix-homebrew | `nix/hosts/mbp/homebrew.nix`, `nix/hosts/mba/homebrew.nix` | Keep `homebrew.onActivation.cleanup = "none"` unless intentionally pruning with explicit approval. |
+| System account, login shell registration, hostnames, Nix daemon/global settings | nix-darwin / NixOS | `nix/hosts/mbp/configuration.nix`, `nix/hosts/mba/configuration.nix`, `nix/hosts/wsl/configuration.nix` | Requires the appropriate system rebuild path and should not be changed by user-level Home Manager activation. |
 
 For cask ownership drift checks, compare declared user casks, declared system casks, and observed `brew list --cask` output as a report-only audit. Do not run `brew uninstall`, `brew bundle cleanup`, `zap`, `home-manager switch`, or `sudo darwin-rebuild switch` as part of a documentation-only audit.
 
@@ -290,10 +292,12 @@ These genuinely require root or should remain in the Darwin layer.
 
 ### Hostname
 
-Defined in `nix/hosts/mbp/configuration.nix`:
+Defined independently in `nix/hosts/mbp/configuration.nix` and
+`nix/hosts/mba/configuration.nix`:
 
 ```nix
-networking.hostName = "styx";
+networking.hostName = "MAC-F0Q3XN9HR9"; # MBP
+# The MBA module uses "MAC-YP2JJ9KNWT".
 ```
 
 Reason: hostname is system networking state.
@@ -324,13 +328,16 @@ Defined in `nix/hosts/mbp/configuration.nix`:
 
 ```nix
 users.users.hades = {
-  uid = 501;
+  uid = 501; # MBP; the MBA module uses 503
   home = "/Users/hades";
   shell = pkgs.fish;
 };
 ```
 
-Reason: UID, home directory, and login shell are system account metadata. The interactive shell config can move to Home Manager, but changing the login shell is a system operation.
+The personal `styx` MacBook Pro uses UID 501, while the company
+`MAC-YP2JJ9KNWT` MacBook Air uses UID 503. Reason: UID, home directory, and
+login shell are system account metadata. The interactive shell config can move
+to Home Manager, but changing the login shell is a system operation.
 
 ### System Shell Registration
 
@@ -364,7 +371,8 @@ Reason: Nix daemon or global Nix settings are system-level. In this repo `nix.en
 
 ### nix-homebrew
 
-Defined in `nix/hosts/mbp/homebrew.nix`:
+Defined independently in `nix/hosts/mbp/homebrew.nix` and
+`nix/hosts/mba/homebrew.nix`:
 
 ```nix
 nix-homebrew = {
@@ -380,7 +388,8 @@ Reason: this manages Homebrew installation/bootstrap state, Rosetta-related setu
 
 ### Homebrew Activation
 
-Defined in `nix/hosts/mbp/homebrew.nix`:
+Defined independently in `nix/hosts/mbp/homebrew.nix` and
+`nix/hosts/mba/homebrew.nix`:
 
 ```nix
 homebrew.onActivation = {
@@ -792,7 +801,8 @@ Keep these Homebrew-managed until migrated or intentionally left as user-install
 Commands used after editing the Darwin/Homebrew files:
 
 ```bash
-nixpkgs-fmt nix/hosts/mbp/configuration.nix nix/hosts/mbp/homebrew.nix
+nixpkgs-fmt nix/hosts/mbp/configuration.nix nix/hosts/mbp/homebrew.nix \
+  nix/hosts/mba/configuration.nix nix/hosts/mba/homebrew.nix
 nix --extra-experimental-features nix-command --extra-experimental-features flakes flake check --no-build
 sudo darwin-rebuild switch --flake /Users/hades/.config/nix#styx --impure
 ```

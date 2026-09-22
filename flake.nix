@@ -57,18 +57,15 @@
       darwinConfigurations =
         let
           inherit (inputs.nix-darwin.lib) darwinSystem;
-          styx = darwinSystem {
+          mkMacBook = configuration: darwinSystem {
             system = "aarch64-darwin";
-
             specialArgs = { inherit inputs; };
-
             modules = [
               inputs.nix-homebrew.darwinModules.nix-homebrew
               inputs.home-manager.darwinModules.home-manager
-              ./nix/hosts/mbp/configuration.nix
+              configuration
               {
                 nixpkgs = nixpkgsConfig;
-
                 home-manager = {
                   useGlobalPkgs = true;
                   useUserPackages = true;
@@ -78,10 +75,30 @@
               }
             ];
           };
+          styx = mkMacBook ./nix/hosts/mbp/configuration.nix;
+          workMacBookAir = mkMacBook ./nix/hosts/mba/configuration.nix;
         in
         {
           "styx" = styx;
           "MAC-F0Q3XN9HR9" = styx;
+          "MAC-YP2JJ9KNWT" = workMacBookAir;
+          luna = darwinSystem {
+            system = "aarch64-darwin";
+            specialArgs = { inherit inputs; };
+            modules = [
+              inputs.home-manager.darwinModules.home-manager
+              ./nix/hosts/mac-mini/configuration.nix
+              {
+                nixpkgs = nixpkgsConfig;
+                home-manager = {
+                  useGlobalPkgs = true;
+                  useUserPackages = true;
+                  backupFileExtension = "backup";
+                  users.kerberos = import ./nix/home/server.nix;
+                };
+              }
+            ];
+          };
         };
 
       homeConfigurations =

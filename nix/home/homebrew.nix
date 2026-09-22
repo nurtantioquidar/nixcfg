@@ -10,8 +10,10 @@ let
     "abue-ammar/tinycast/tinycast"
     "caffeine"
     "claude"
+    "ghostty"
     "iina"
     "jetbrains-toolbox"
+    "manaflow-ai/cmux/cmux"
     "nikitabobko/tap/aerospace"
     "obsidian"
     "orbstack"
@@ -32,6 +34,7 @@ let
   brewfile = pkgs.writeText "user-homebrew-Brewfile" ''
     tap "homebrew/cask"
     tap "abue-ammar/tinycast"
+    tap "manaflow-ai/cmux"
     tap "nikitabobko/tap"
 
     ${lib.concatMapStringsSep "\n" (cask: ''cask "${cask}"'') userCasks}
@@ -64,6 +67,7 @@ in
           # Trust only the exact third-party casks Home Manager installs, not
           # either full tap.
           $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask abue-ammar/tinycast/tinycast
+          $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask manaflow-ai/cmux/cmux
           $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask nikitabobko/tap/aerospace
 
           if [ -f "$managed_casks" ]; then

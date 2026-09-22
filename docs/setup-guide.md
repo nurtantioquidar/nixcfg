@@ -1,10 +1,14 @@
 # Nix Setup Guide
 
-This repository manages three flake outputs:
+This repository manages these host and user profiles:
 
-- `darwinConfigurations.styx` for the macOS host, with `darwinConfigurations.MAC-F0Q3XN9HR9` as the IT hostname alias.
+- `darwinConfigurations.styx` for the personal MacBook Pro, also exposed as `darwinConfigurations.MAC-F0Q3XN9HR9` (`hades`, UID 501).
+- `darwinConfigurations.MAC-YP2JJ9KNWT` for the company MacBook Air (`hades`, UID 503); it is intentionally not the personal `styx` alias.
+- The two laptops intentionally share the full Home Manager profile and currently mirror the same privileged Homebrew baseline, while retaining separate host modules for future divergence.
 - `nixosConfigurations.wsl` for the NixOS-WSL host.
 - `homeConfigurations.hades` for standalone macOS Home Manager activation.
+- `darwinConfigurations.luna` for the Mac mini server (`kerberos`). Follow
+  [Luna setup](luna-setup.md) for its console bootstrap and remote handoff.
 
 Darwin is the primary system path in this guide. WSL uses the same Home Manager profile where practical. On macOS, day-to-day user-level changes should prefer standalone Home Manager when they do not need root.
 
@@ -30,7 +34,16 @@ sudo darwin-rebuild switch --flake /Users/hades/.config/nix#styx --impure
 sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 ```
 
-Select the Darwin output explicitly with `#styx` for the friendly name, or `#MAC-F0Q3XN9HR9` when matching the IT-managed hostname.
+Select the personal MacBook Pro with `#styx` or `#MAC-F0Q3XN9HR9`. Select the company MacBook Air only with `#MAC-YP2JJ9KNWT`.
+
+For the first activation on the company MacBook Air, verify that `id -u hades`
+prints `503`, then run:
+
+```bash
+sudo nix run nix-darwin/master#darwin-rebuild -- switch \
+  --flake /Users/hades/.config/nix#MAC-YP2JJ9KNWT \
+  --impure
+```
 
 With flakes, local changes must be visible to Git before a rebuild can read them. Stage or commit changed files first when a rebuild says a path is missing from the source tree.
 
@@ -108,9 +121,9 @@ Activate only when the change should be applied and potential Homebrew cask stat
 home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
 ```
 
-The module writes `~/.config/homebrew/Brewfile` and runs `brew bundle install --no-upgrade` as the user. Home Manager exports `HOMEBREW_CASK_OPTS=--appdir=/Users/hades/Applications` on macOS, so ordinary app-bundle casks install real app bundles under the user-owned `~/Applications` directory without requiring `sudo darwin-rebuild`. Casks that run package installers or install VPNs, system extensions, audio drivers, virtualization helpers, or other privileged components may still need admin privileges; keep those in `nix/hosts/mbp/homebrew.nix`.
+The module writes `~/.config/homebrew/Brewfile` and runs `brew bundle install --no-upgrade` as the user. Home Manager exports `HOMEBREW_CASK_OPTS=--appdir=/Users/hades/Applications` on macOS, so ordinary app-bundle casks install real app bundles under the user-owned `~/Applications` directory without requiring `sudo darwin-rebuild`. Casks that run package installers or install VPNs, system extensions, audio drivers, virtualization helpers, or other privileged components may still need admin privileges; keep those in the applicable laptop's `homebrew.nix` under `nix/hosts/mbp` or `nix/hosts/mba`.
 
-Tinycast is installed from its pinned third-party cask. The activation trusts only `abue-ammar/tinycast/tinycast`, rather than the entire tap. `nix/home/tinycast.nix` manages its launcher search scopes and places `~/Applications/Claude.app` before `/Applications`, ensuring Tinycast keeps the user-owned, upgradeable Claude Desktop bundle when both copies share the same bundle identifier.
+Tinycast and cmux are installed from pinned third-party casks. The activation trusts only their exact casks, plus the exact AeroSpace cask, rather than any complete third-party tap. Ghostty is also installed as a user cask, while `nix/home/ghostty.nix` owns its configuration. `nix/home/tinycast.nix` manages Tinycast's launcher search scopes and places `~/Applications/Claude.app` before `/Applications`, ensuring Tinycast keeps the user-owned, upgradeable Claude Desktop bundle when both copies share the same bundle identifier.
 
 The user-level Brewfile does not run `brew bundle cleanup`. Cleanup is intentionally manual because Homebrew cleanup sees all installed casks, including privileged casks owned by the Darwin profile. Removing a cask from the user-managed list can still uninstall a previously managed cask during Home Manager activation unless that cask remains explicitly exempted or is moved through an approved user/admin flow. For drift audits, compare declared lists and `brew list --cask` output as a report-only check; do not uninstall or cleanup as part of the audit.
 
@@ -313,7 +326,7 @@ sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 
 ### Homebrew Cask API Fails During Rebuild
 
-`nix/hosts/mbp/homebrew.nix` lets Homebrew update during activation and runs `brew bundle` for privileged casks with `HOMEBREW_NO_INSTALL_FROM_API=1`. This avoids failures in Homebrew's cask API loader, such as:
+The laptop-specific `nix/hosts/mbp/homebrew.nix` and `nix/hosts/mba/homebrew.nix` modules let Homebrew update during activation and run `brew bundle` for privileged casks with `HOMEBREW_NO_INSTALL_FROM_API=1`. This avoids failures in Homebrew's cask API loader, such as:
 
 ```text
 Error: undefined method 'to_sym' for nil
@@ -350,13 +363,13 @@ sudo darwin-rebuild switch --flake /Users/hades/.config/nix#styx --impure
 
 ### A Cask Vendor Download Fails
 
-If one privileged cask download returns a vendor-side HTTP error, `brew bundle` fails the whole activation. Keep that app out of `homebrew.casks` until the vendor URL is healthy again, then install it manually or re-enable it in `nix/hosts/mbp/homebrew.nix`.
+If one privileged cask download returns a vendor-side HTTP error, `brew bundle` fails the whole activation. Keep that app out of `homebrew.casks` until the vendor URL is healthy again, then install it manually or re-enable it in the applicable laptop's `homebrew.nix`.
 
 CLI tools are usually better managed through Nix when possible. For example, Google Cloud SDK is installed as `google-cloud-sdk` through Home Manager instead of the Homebrew `gcloud-cli` cask, avoiding Caskroom upgrade state failures during activation.
 
 ### Homebrew Cleanup Refuses To Uninstall Dependencies
 
-This config uses `homebrew.onActivation.cleanup = "none"` so ordinary user-installed Homebrew apps are not pruned during activation. If cleanup is temporarily changed to `uninstall` or `zap`, remember that unmanaged casks installed outside `nix/hosts/mbp/homebrew.nix` may be removed during the next `sudo darwin-rebuild`.
+Both laptop configs use `homebrew.onActivation.cleanup = "none"` so ordinary user-installed Homebrew apps are not pruned during activation. If cleanup is temporarily changed to `uninstall` or `zap`, remember that unmanaged casks installed outside the applicable laptop's `homebrew.nix` may be removed during the next `sudo darwin-rebuild`.
 
 ### Homebrew Cask Removal Hits Immutable Files
 

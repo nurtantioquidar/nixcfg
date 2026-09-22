@@ -4,7 +4,10 @@ This repository manages personal Nix configuration for macOS and WSL.
 
 ## Scope
 
-- macOS host: `darwinConfigurations.styx` with IT hostname alias `darwinConfigurations.MAC-F0Q3XN9HR9`
+- Personal MacBook Pro: `darwinConfigurations.styx`, also exposed as `darwinConfigurations.MAC-F0Q3XN9HR9`, account `hades` UID 501. This former company laptop is personally owned through the laptop ownership program.
+- Company MacBook Air: `darwinConfigurations.MAC-YP2JJ9KNWT`, account `hades` UID 503. It is work-only and must not use the personal `styx` alias.
+- The MBP and MBA intentionally share the full `nix/home/home.nix` Home Manager profile and currently mirror the same privileged Homebrew baseline. Keep their host modules separate so they can diverge later without changing host identity or UID handling.
+- Mac mini server: `darwinConfigurations.luna`, account `kerberos`; see `docs/luna-setup.md`.
 - WSL host: `nixosConfigurations.wsl`
 - Standalone macOS Home Manager profile: `homeConfigurations.hades`
 - Shared Home Manager profile: `nix/home/home.nix`
@@ -13,7 +16,11 @@ This repository manages personal Nix configuration for macOS and WSL.
 ## Working Rules
 
 - Prefer the existing Nix module layout over introducing new structure.
-- Keep host-specific changes under `nix/hosts/mbp` or `nix/hosts/wsl`.
+- Keep host-specific changes under `nix/hosts/mbp`, `nix/hosts/mba`, `nix/hosts/mac-mini`, or `nix/hosts/wsl`.
+- Luna uses the minimal `nix/home/server.nix` profile; do not import the laptop's desktop apps or hard-coded hades secrets into it. Its Home Manager is activated through the Darwin output.
+- Luna uses upstream Nix managed by nix-darwin, the Nix Tailscale system daemon (not Tailscale.app), and Colima as a system LaunchDaemon running as kerberos. Verify boot without GUI login on the actual mini before claiming unattended readiness.
+- First luna activation must run at its console with a valid authorized_keys already installed: SSH is restricted to Tailscale source ranges. FileVault and automatic login are manual owner decisions; no change to either is implied by activation. GUI agents need a separate session/permissions design.
+- Validate luna with `nix build .#darwinConfigurations.luna.system --no-link` (plus feature flags if needed); activate only on the mini with `sudo darwin-rebuild switch --flake /Users/kerberos/.config/nix#luna`. Use a `path:` flake URL when validating new untracked modules.
 - Keep host-specific helper scripts under `nix/hosts/<host>/scripts`.
 - Keep shared user packages, shells, Git, prompt, and dotfile behavior under `nix/home`.
 - Keep shared host import wiring in `nix/lib/mkImports.nix`; prefer updating host module lists over bypassing the helper.
@@ -21,7 +28,7 @@ This repository manages personal Nix configuration for macOS and WSL.
 - Keep Codex CLI user-managed through `nix/home/codex.nix`; use `codex-upgrade` to rerun OpenAI's standalone installer without sudo.
 - Keep Herdr user-managed through the pinned upstream flake input and `nix/home/herdr.nix`; update it with `nix flake update herdr` and rebuild Home Manager. Its config and wrapper are also owned by that module: mouse capture stays enabled for pane navigation, while the wrapper clears host mouse-reporting modes after Herdr exits so they cannot leak into the parent shell.
 - Keep global npm package management in `nix/home/node-packages.nix`. That module writes `~/.npmrc` so `npm install --global` uses the user-writable `~/.local` prefix instead of the immutable Nix store. Home Manager installs missing packages without upgrading existing ones; use `node-packages-upgrade` for an explicit update of all declared global npm packages.
-- Keep Ghostty user-managed through `nix/home/ghostty.nix`.
+- Keep Ghostty user-managed through the `ghostty` cask in `nix/home/homebrew.nix`, with its configuration in `nix/home/ghostty.nix`.
 - Keep Zellij user-managed through `nix/home/zellij.nix`. Its wrapper intentionally normalizes `TMPDIR` outside direnv/Nix `nix-shell.*` temp directories, sets `ZELLIJ_SOCKET_DIR` to a short per-user `/tmp` path to avoid macOS socket path limits, and downgrades Ghostty's outer `TERM` to avoid leaked DSR responses like `?997;2n` when launching Zellij from this repo. Ghostty config sets the left Option key as terminal Alt for Zellij bindings while the right Option key remains available for macOS character input. Zellij clears default bindings so `Alt+Left`/`Alt+Right` stay available for shell word navigation, and `nix/home/zsh.nix` binds the common Option+Arrow escape sequences to zsh word movement so trailing `C`/`D` bytes are not inserted. `Alt+Shift+f` toggles floating panes, `Alt+Shift+n` opens a tab, and `Ctrl+y` launches zellij-forgot. The zellij-autolock plugin is defined but intentionally not loaded because upstream issue fresh2dev/zellij-autolock#20 reports that it can immediately undo manual `Ctrl+g` lock/unlock changes. For Zellij prompts that show `<Del>` on Mac keyboards, use `Fn+Delete`; Ghostty cannot bind `fn` directly.
 - Keep the VS Code CLI user-scoped on macOS. Home Manager installs a `code` wrapper for `/Users/hades/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code` because this machine previously had VS Code ownership and app-bundle issues when moving between Homebrew, Home Manager app links, and system locations.
 - Keep local secrets outside this flake. The expected external secrets path is documented in `docs/setup-guide.md`.
@@ -45,7 +52,7 @@ For the Darwin host, select the configured host explicitly:
 sudo darwin-rebuild switch --flake /Users/hades/.config/nix#styx --impure
 ```
 
-The IT-managed macOS hostname is also exposed as `#MAC-F0Q3XN9HR9`; keep `#styx` as the friendly alias.
+The personal MacBook Pro hostname is also exposed as `#MAC-F0Q3XN9HR9`; keep `#styx` as its friendly alias. Use only `#MAC-YP2JJ9KNWT` for the company MacBook Air.
 
 For user-level macOS Home Manager changes, validate the standalone profile without sudo:
 
@@ -59,7 +66,7 @@ Activate the standalone profile only when the change should be applied to the us
 home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes --flake /Users/hades/.config/nix#hades --impure
 ```
 
-Keep root-required macOS settings in `darwinConfigurations.styx` / `darwinConfigurations.MAC-F0Q3XN9HR9`; move user packages, shells, Git, prompt, and dotfile behavior through `homeConfigurations.hades` when possible.
+Keep root-required macOS settings in the applicable MacBook Darwin configuration; move user packages, shells, Git, prompt, and dotfile behavior through `homeConfigurations.hades` when possible.
 
 For WSL:
 
@@ -69,11 +76,12 @@ sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 
 ## Homebrew Notes
 
-Homebrew bootstrap, pinned taps, and privileged casks are managed through `nix-homebrew` and `nix/hosts/mbp/homebrew.nix`.
+Homebrew bootstrap, pinned taps, and privileged casks are managed per laptop through `nix-homebrew` and the applicable `nix/hosts/mbp/homebrew.nix` or `nix/hosts/mba/homebrew.nix` module.
 
 - Keep `homebrew/cask` in `homebrew.taps`.
 - Keep `inputs.homebrew-cask` exposed through `nix-homebrew.taps."homebrew/homebrew-cask"`.
 - Keep `manaflow-ai/cmux` in `homebrew.taps` and expose `inputs.homebrew-cmux` through `nix-homebrew.taps."manaflow-ai/homebrew-cmux"` for the cmux cask.
+- Trust only the exact Tinycast, cmux, and AeroSpace casks through `nix-homebrew.trust.casks`; do not trust their complete third-party taps.
 - Keep Tinycast user-managed through `nix/home/homebrew.nix`; expose `inputs.homebrew-tinycast` through `nix-homebrew.taps."abue-ammar/homebrew-tinycast"` for its pinned third-party cask. Trust only the exact Tinycast and AeroSpace casks during activation—not their full third-party taps—and keep launcher preferences in `nix/home/tinycast.nix` so the user-owned Claude app wins duplicate bundle-ID resolution.
 - Keep AeroSpace fully user-managed through its official cask and tap in `nix/home/homebrew.nix`, with its configuration in `nix/home/aerospace.nix`; it must not require `sudo darwin-rebuild` or admin access.
 - Keep ordinary app-bundle casks out of Darwin `homebrew.casks`; declare them in `nix/home/homebrew.nix` instead. Home Manager writes a user Brewfile and runs `brew bundle install --no-upgrade` with `HOMEBREW_CASK_OPTS=--appdir=/Users/hades/Applications`. Casks with package installers or privileged components may still need the admin path.

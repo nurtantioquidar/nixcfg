@@ -39,7 +39,8 @@
       "pritunl"
       "mullvad-vpn"
       "1password"
-      "expressvpn"
+      # ExpressVPN is preinstalled and managed by the company on this MBA.
+      # Do not let Homebrew replace its app or privileged daemon.
       "cloudflare-warp"
     ];
 
