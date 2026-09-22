@@ -22,6 +22,7 @@ let
     "soundsource"
     "spotify"
     "the-unarchiver"
+    "zed"
   ];
 
   # These were briefly user-managed during the Homebrew split, but they are
