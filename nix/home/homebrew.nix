@@ -9,6 +9,7 @@ let
   userCasks = [
     "abue-ammar/tinycast/tinycast"
     "caffeine"
+    "chatgpt"
     "claude"
     "ghostty"
     "iina"
