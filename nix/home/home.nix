@@ -54,13 +54,9 @@ in
       grafana-loki
     ] ++ lib.optionals pkgs.stdenv.isDarwin [
       _1password-cli
-      act
       argocd
       bun
       cloudflared
-      colima
-      docker
-      docker-compose
       gnupg
       kubectl
       mas
@@ -189,12 +185,6 @@ in
           symbol = " ";
           style = "bold bright-red";
           format = "via [$symbol($version )]($style)";
-        };
-
-        docker_context = {
-          symbol = " ";
-          style = "bold bright-blue";
-          format = "via [$symbol$context]($style) ";
         };
 
         kubernetes = {

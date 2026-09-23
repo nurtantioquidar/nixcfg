@@ -1,8 +1,8 @@
 { pkgs, lib, ... }:
 
 let
-  # User-owned app-bundle casks installed into $HOME/Applications by the
-  # Home Manager activation below. Treat membership changes as state-changing:
+  # User-owned casks installed by Home Manager. App bundles go to
+  # $HOME/Applications. Treat membership changes as state-changing:
   # removing an entry that was previously written to managed-casks can uninstall
   # that cask during activation unless it remains listed in systemCasks or is
   # moved through an explicit user/admin flow.
@@ -17,7 +17,7 @@ let
     "manaflow-ai/cmux/cmux"
     "nikitabobko/tap/aerospace"
     "obsidian"
-    "orbstack"
+    "suruseas/opossum/opossum"
     "rectangle"
     "scroll-reverser"
     "soundsource"
@@ -38,6 +38,9 @@ let
     tap "abue-ammar/tinycast"
     tap "manaflow-ai/cmux"
     tap "nikitabobko/tap"
+    tap "suruseas/opossum"
+
+    brew "container"
 
     ${lib.concatMapStringsSep "\n" (cask: ''cask "${cask}"'') userCasks}
   '';
@@ -71,6 +74,7 @@ in
           $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask abue-ammar/tinycast/tinycast
           $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask manaflow-ai/cmux/cmux
           $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask nikitabobko/tap/aerospace
+          $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask suruseas/opossum/opossum
 
           if [ -f "$managed_casks" ]; then
             while IFS= read -r cask; do

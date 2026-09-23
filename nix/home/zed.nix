@@ -9,15 +9,17 @@
         auto_install_extensions = {
           catppuccin = true;
           html = true;
+          nix = true;
         };
         base_keymap = "VSCode";
+        languages.Nix.language_servers = [ "nil" ];
         project_panel.dock = "left";
         theme = "Catppuccin Mocha";
         ui_font_family = "Geist";
         ui_font_size = 14;
-        buffer_font_family = "Geist Mono";
+        buffer_font_family = "Berkeley Mono";
         buffer_font_size = 12;
-        terminal.font_family = "Geist Mono";
+        terminal.font_family = "Berkeley Mono";
         terminal.font_size = 12;
       };
     };

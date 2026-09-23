@@ -51,7 +51,7 @@
       gds = "git diff --staged";
       gd = "git diff";
       gs = "git status";
-      ll = "ls -ltra";
+      ll = "ls -la";
     };
   };
 }

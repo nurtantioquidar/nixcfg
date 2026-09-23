@@ -107,7 +107,7 @@ Spotlight must be enabled for user apps to appear in Spotlight search. If `mduti
 
 Normal macOS GUI apps should stay out of Home Manager unless a specific app has been proven reliable from Home Manager. Home Manager links app bundles into `~/Applications/home-manager-apps` as symlinks to `/nix/store`; several GUI apps failed macOS code-signing/Gatekeeper checks from that location. Keep Home Manager focused on CLI/dev tools and user-scoped configuration.
 
-Ordinary Homebrew casks are declared in `nix/home/homebrew.nix`. The current working-tree user cask list includes ordinary app bundles plus explicit user-owned entries such as `claude`, `soundsource`, and `orbstack`; do not reclassify or remove those entries during audit-only work without an explicit approval step.
+Ordinary Homebrew casks are declared in `nix/home/homebrew.nix`. The laptop profile uses Opossum's cask and its Apple `container` formula dependency instead of OrbStack. See [Apple container setup](apple-container.md) before switching existing Compose projects.
 
 Validate cask-list edits with the Home Manager activation package build before applying them:
 
@@ -295,11 +295,9 @@ The verification script creates a temporary repository with `mktemp`, attempts a
 
 ## SSH Agent Configuration
 
-`nix/home/ssh.nix` manages the user SSH client config through Home Manager. It preserves the OrbStack and Colima include files and configures the 1Password SSH agent for all hosts:
+`nix/home/ssh.nix` manages the user SSH client config through Home Manager. It configures the 1Password SSH agent for all hosts:
 
 ```sshconfig
-Include ~/.orbstack/ssh/config /Users/hades/.colima/ssh_config
-
 Host *
     IdentityAgent ~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
 ```

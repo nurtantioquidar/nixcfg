@@ -3,11 +3,6 @@ _:
   programs.zsh = {
     enable = true;
 
-    profileExtra = ''
-      # OrbStack command-line tools and integration
-      source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || true
-    '';
-
     initContent = ''
       if [ -e "$HOME/.env" ]; then
         source "$HOME/.env"
@@ -58,12 +53,12 @@ _:
       gds = "git diff --staged";
       gd = "git diff";
       gs = "git status";
-      ll = "ls -ltra";
+      ll = "ls -la";
     };
 
     oh-my-zsh = {
       enable = true;
-      plugins = [ "git" "sudo" "docker" "kubectl" "tmux" ];
+      plugins = [ "git" "sudo" "kubectl" "tmux" ];
     };
   };
 }

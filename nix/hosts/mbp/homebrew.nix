@@ -14,6 +14,7 @@
       "abue-ammar/tinycast/tinycast"
       "manaflow-ai/cmux/cmux"
       "nikitabobko/tap/aerospace"
+      "suruseas/opossum/opossum"
     ];
 
     taps = {
@@ -21,6 +22,7 @@
       "manaflow-ai/homebrew-cmux" = inputs.homebrew-cmux;
       "abue-ammar/homebrew-tinycast" = inputs.homebrew-tinycast;
       "nikitabobko/homebrew-tap" = inputs.homebrew-aerospace;
+      "suruseas/homebrew-opossum" = inputs.homebrew-opossum;
     };
   };
 

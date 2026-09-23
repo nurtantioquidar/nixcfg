@@ -141,6 +141,22 @@
         "url": "https://github.com/manaflow-ai/homebrew-cmux.git"
       }
     },
+    "homebrew-opossum": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790127091,
+        "narHash": "sha256-vBjr1ZCJ4U7dktjZpniwT2Nd8uGeoC+25TDXMWI9gls=",
+        "owner": "suruseas",
+        "repo": "homebrew-opossum",
+        "rev": "acc0a967f175fec465c8f5ab11066629f75887de",
+        "type": "github"
+      },
+      "original": {
+        "owner": "suruseas",
+        "repo": "homebrew-opossum",
+        "type": "github"
+      }
+    },
     "homebrew-tinycast": {
       "flake": false,
       "locked": {
@@ -240,6 +256,7 @@
         "homebrew-aerospace": "homebrew-aerospace",
         "homebrew-cask": "homebrew-cask",
         "homebrew-cmux": "homebrew-cmux",
+        "homebrew-opossum": "homebrew-opossum",
         "homebrew-tinycast": "homebrew-tinycast",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",

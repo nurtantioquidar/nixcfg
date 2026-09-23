@@ -10,11 +10,13 @@ Air is `darwinConfigurations.MAC-YP2JJ9KNWT`. The repo also exposes
 
 Use this section as the current source of truth before reading the historical migration notes below.
 
+The Apple container migration in September 2026 supersedes historical OrbStack entries later in this audit. Those entries describe the earlier privilege review, not the current laptop package baseline.
+
 | Area | Current owner | Evidence | Operational rule |
 | --- | --- | --- | --- |
 | User packages, shells, Git, prompt, dotfiles, Codex CLI, npm globals | Home Manager under `nix/home` | `nix/home/home.nix`, `nix/home/codex.nix`, `nix/home/node-packages.nix` | Validate with the standalone `homeConfigurations.hades.activationPackage` build; activate with `home-manager switch` only when applying user state. |
 | Ordinary user Homebrew app casks | User Homebrew module | `nix/home/homebrew.nix` | Preserve the current cask membership during audit-only work. Removing a previously managed cask can uninstall it during Home Manager activation unless explicitly exempted. |
-| Current user cask baseline | User Homebrew module | `nix/home/homebrew.nix` | Current entries include `caffeine`, `iina`, `jetbrains-toolbox`, `rectangle`, `scroll-reverser`, `the-unarchiver`, `spotify`, `soundsource`, `orbstack`, and `claude`. Treat `claude`, `soundsource`, and `orbstack` as current working-tree state, not as automatic migration candidates. |
+| Current user cask baseline | User Homebrew module | `nix/home/homebrew.nix` | Current entries include `caffeine`, `iina`, `jetbrains-toolbox`, `rectangle`, `scroll-reverser`, `the-unarchiver`, `spotify`, `soundsource`, `claude`, and `suruseas/opossum/opossum`. The Opossum cask pulls in Homebrew's Apple `container` formula; see `docs/apple-container.md`. |
 | Privileged/system Homebrew casks | Darwin Homebrew module | `nix/hosts/mbp/homebrew.nix`, `nix/hosts/mba/homebrew.nix` | Keep VPN/security/system-helper casks on the Darwin/admin path unless a later explicit admin-window plan moves them. |
 | Homebrew bootstrap, pinned taps, Rosetta, cleanup policy | nix-darwin / nix-homebrew | `nix/hosts/mbp/homebrew.nix`, `nix/hosts/mba/homebrew.nix` | Keep `homebrew.onActivation.cleanup = "none"` unless intentionally pruning with explicit approval. |
 | System account, login shell registration, hostnames, Nix daemon/global settings | nix-darwin / NixOS | `nix/hosts/mbp/configuration.nix`, `nix/hosts/mba/configuration.nix`, `nix/hosts/wsl/configuration.nix` | Requires the appropriate system rebuild path and should not be changed by user-level Home Manager activation. |

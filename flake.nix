@@ -39,6 +39,11 @@
       flake = false;
     };
 
+    homebrew-opossum = {
+      url = "github:suruseas/homebrew-opossum";
+      flake = false;
+    };
+
     nixos-wsl.url = "github:nix-community/NixOS-WSL";
     nixos-wsl.inputs.nixpkgs.follows = "nixpkgs";
 
