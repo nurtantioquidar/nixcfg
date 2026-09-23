@@ -8,11 +8,20 @@
       text = builtins.toJSON {
         auto_install_extensions = {
           catppuccin = true;
+          dockerfile = true;
           html = true;
+          make = true;
           nix = true;
         };
         base_keymap = "VSCode";
-        languages.Nix.language_servers = [ "nil" ];
+        languages = {
+          Nix.language_servers = [ "nil" ];
+          Python = {
+            language_servers = [ "ty" "ruff" ];
+            code_actions_on_format."source.organizeImports.ruff" = true;
+            formatter.language_server.name = "ruff";
+          };
+        };
         project_panel.dock = "left";
         theme = "Catppuccin Mocha";
         ui_font_family = "Geist";
