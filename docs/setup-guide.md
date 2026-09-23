@@ -98,7 +98,7 @@ Fish is the shell that should receive day-to-day PATH and SDKMAN behavior. `nix/
 Standalone Home Manager manages user-scoped macOS preferences and assets where possible:
 
 - Dock orientation, autohide, tile size, `show-recents`, and `static-only`.
-- Fira Code and JetBrains Mono Nerd Fonts under `~/Library/Fonts/HomeManager`.
+- Fira Code and JetBrains Mono Nerd Fonts under `~/Library/Fonts/HomeManager`, and Geist fonts for Zed directly under `~/Library/Fonts`.
 - App links under `~/Applications/home-manager-apps`.
 
 Dock persistent apps remain in nix-darwin for now because nix-darwin exposes a richer `system.defaults.dock.persistent-apps` option than Home Manager's typed Darwin defaults module.
