@@ -11,6 +11,8 @@ let
     "caffeine"
     "chatgpt"
     "claude"
+    "crmne/tap/spotifast"
+    "crmne/tap/zapfast"
     "ghostty"
     "iina"
     "jetbrains-toolbox"
@@ -21,7 +23,6 @@ let
     "rectangle"
     "scroll-reverser"
     "soundsource"
-    "spotify"
     "the-unarchiver"
     "zed"
   ];
@@ -36,6 +37,7 @@ let
   brewfile = pkgs.writeText "user-homebrew-Brewfile" ''
     tap "homebrew/cask"
     tap "abue-ammar/tinycast"
+    tap "crmne/tap"
     tap "manaflow-ai/cmux"
     tap "nikitabobko/tap"
     tap "suruseas/opossum"
@@ -69,9 +71,11 @@ in
           export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
           export HOMEBREW_NO_AUTO_UPDATE=1
 
-          # Trust only the exact third-party casks Home Manager installs, not
-          # either full tap.
+          # Trust only the exact third-party casks Home Manager installs,
+          # not their full taps.
           $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask abue-ammar/tinycast/tinycast
+          $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask crmne/tap/spotifast
+          $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask crmne/tap/zapfast
           $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask manaflow-ai/cmux/cmux
           $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask nikitabobko/tap/aerospace
           $DRY_RUN_CMD /opt/homebrew/bin/brew trust --cask suruseas/opossum/opossum
