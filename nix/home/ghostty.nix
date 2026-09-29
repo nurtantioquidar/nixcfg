@@ -5,8 +5,8 @@
     text = ''
       # aesthetics
       theme = dark:Catppuccin Mocha,light:Catppuccin Latte
-      background-opacity = 0.85
-      background-blur = 16
+      # background-opacity = 0.85
+      # background-blur = 16
       # background = #000000
       window-padding-x = 8
       window-padding-y = 8
