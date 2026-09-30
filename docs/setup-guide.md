@@ -151,7 +151,7 @@ The repository's default `nix develop` shell uses the same toolchain definition.
 
 ## Herdr
 
-Herdr is installed for macOS and WSL through the pinned upstream `herdr` flake input and the shared `nix/home/herdr.nix` module. Upgrade the pin and rebuild the standalone Home Manager profile with:
+Herdr is installed for macOS and WSL through the pinned upstream `herdr` flake input and the shared `nix/home/herdr.nix` module. Change the Herdr release tag in `flake.nix`, then update the lock file and rebuild the standalone Home Manager profile with:
 
 ```bash
 nix flake update herdr
@@ -164,6 +164,8 @@ Start or reattach to the default session with `herdr`. Because Nix owns the bina
 navigation. The Home Manager package is a thin wrapper around the pinned binary that clears host
 mouse-reporting modes after Herdr exits, avoiding raw SGR coordinates in the parent shell without
 disabling Herdr's mouse UI.
+
+Herdr's running server continues using its old binary after a Nix upgrade. Nix-managed installs cannot use `herdr update --handoff`, so arrange a server restart to pick up server-side fixes. Restarting ends every pane process; Herdr restores the layout and working directories, then resumes agent conversations only when it has native session references from current integrations. Check `herdr integration status` and `herdr pane list` before stopping a server with active agents. Install the user-level hooks with `herdr integration install claude` and `herdr integration install codex`; reinstall them after a Herdr upgrade if their status is outdated. The v0.9.1 pin includes an upstream fix for mouse-report fragments leaking into pane input when reports arrive across delayed reads.
 
 ## VS Code
 

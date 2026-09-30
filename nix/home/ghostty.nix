@@ -13,13 +13,13 @@
       window-decoration = true
 
       # typography
-      font-family = Berkeley Mono
-      font-family-bold = Berkeley Mono
-      font-family-italic = Berkeley Mono
-      font-family-bold-italic = Berkeley Mono
+      font-family = Geist Mono
+      font-family-bold = Geist Mono
+      font-family-italic = Geist Mono
+      font-family-bold-italic = Geist Mono
       font-style-bold = Bold
-      font-style-italic = Oblique
-      font-style-bold-italic = Bold Oblique
+      font-style-italic = Italic
+      font-style-bold-italic = Bold Italic
       font-size = 12
       font-thicken = true
       font-thicken-strength = 1
