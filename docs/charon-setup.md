@@ -108,10 +108,62 @@ Validate from the Mac without building:
 nix --extra-experimental-features 'nix-command flakes' eval --raw .#nixosConfigurations.charon.config.system.build.toplevel.drvPath
 ```
 
+## Backups
+
+Every application keeps its state under `/srv/<app>`. Everything else is
+rebuildable from this flake, so restic backs up `/srv` only. It runs daily at
+19:00 UTC (02:00 WIB), then prunes to 7 daily, 4 weekly and 6 monthly
+snapshots, then verifies 2% of the data. The unit is skipped, not failed,
+until all three credential files exist in `/var/lib/secrets/restic/`.
+
+Applications using SQLite must not rely on a plain file copy: give each one
+a `backupPrepareCommand` that writes a consistent dump (for example
+`sqlite3 db ".backup db.bak"`) into its `/srv/<app>` directory.
+
+### Credentials (once)
+
+1. In Cloudflare, create an R2 bucket `charon-backups`. Then create an R2 API
+   token with **Object Read & Write** limited to that bucket, and note its
+   access key ID, secret access key, and the S3 endpoint
+   `https://<account-id>.r2.cloudflarestorage.com`. Backblaze B2 also works
+   through its S3 endpoint.
+2. In a terminal (not a chat), create the files on charon. Editing them
+   keeps secrets out of shell history:
+
+```bash
+ssh -t hades@charon
+d=/var/lib/secrets/restic  # root-only directory
+for f in repository password env; do sudo install -m 600 /dev/null $d/$f; done
+sudo nvim $d/repository  # s3:https://<account-id>.r2.cloudflarestorage.com/charon-backups
+head -c 32 /dev/urandom | base64 | sudo tee $d/password >/dev/null
+sudo nvim $d/env
+```
+
+   `env` contains:
+
+```bash
+AWS_ACCESS_KEY_ID=<access key id>
+AWS_SECRET_ACCESS_KEY=<secret access key>
+AWS_DEFAULT_REGION=auto
+```
+
+3. Save the repository URL and the contents of `password`
+   (`sudo cat /var/lib/secrets/restic/password`) in 1Password. Without the password the backups
+   cannot be restored, and nobody can recover it.
+
+### Running and restoring
+
+```bash
+sudo systemctl start restic-backups-offsite   # first run initialises the repository
+journalctl -u restic-backups-offsite -e
+sudo restic-offsite snapshots
+sudo restic-offsite restore latest --target /tmp/restore --include /srv/<app>
+```
+
+Test a restore after adding each application.
+
 ## Next layers
 
-- restic backups of `/srv` and `/var/lib` to off-site object storage, with a
-  test restore; credentials stay outside the flake.
 - Applications as Docker Compose stacks under `/srv/<app>`: AIOStreams and
   Hermes Agent tailnet-only through `tailscale serve`; Hermes uses its Docker
   terminal backend, an allowlisted chat user, and no Docker socket.

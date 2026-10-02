@@ -11,6 +11,7 @@ in
       ./hardware.nix
       ./disko.nix
       ./services.nix
+      ./backup.nix
     ];
   };
 
