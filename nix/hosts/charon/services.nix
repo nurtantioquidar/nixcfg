@@ -5,7 +5,7 @@ let
   # first `tailscale up` can be run. Set to false and rebuild once
   # `ssh hades@charon` works over the tailnet; SSH then accepts Tailscale
   # source addresses only, and port 22 closes on the public interface.
-  bootstrapPublicSsh = true;
+  bootstrapPublicSsh = false;
 in
 {
   services.tailscale = {
