@@ -1,21 +1,31 @@
-{ config, username, ... }:
+{ config, pkgs, username, ... }:
 
 let
-  # Phase 1 (install): SSH is reachable on the public IP, key-only, so the
-  # first `tailscale up` can be run. Set to false and rebuild once
-  # `ssh hades@charon` works over the tailnet; SSH then accepts Tailscale
-  # source addresses only, and port 22 closes on the public interface.
+  # Escape hatch for a manual install without a Tailscale auth key: true
+  # opens key-only SSH on the public IP. provision.sh never needs it, because
+  # the host joins the tailnet on first boot.
   bootstrapPublicSsh = false;
+
+  # One-time key staged by scripts/provision.sh. Read only while the node
+  # needs login, then deleted.
+  tailscaleAuthKey = "/var/lib/secrets/tailscale/authkey";
 in
 {
   services.tailscale = {
     enable = true;
     openFirewall = true;
+    authKeyFile = tailscaleAuthKey;
+    extraUpFlags = [ "--advertise-tags=tag:vps" "--hostname=charon" ];
   };
+  systemd.services.tailscaled-autoconnect.serviceConfig.ExecStartPost =
+    "${pkgs.coreutils}/bin/rm -f ${tailscaleAuthKey}";
 
   services.openssh = {
     enable = true;
     openFirewall = false;
+    # A single host key, kept in 1Password and restored by provision.sh, so
+    # reinstalls keep the same identity.
+    hostKeys = [{ path = "/etc/ssh/ssh_host_ed25519_key"; type = "ed25519"; }];
     settings = {
       PermitRootLogin = "no";
       PasswordAuthentication = false;
