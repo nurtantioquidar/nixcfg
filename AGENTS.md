@@ -9,6 +9,7 @@ This repository manages personal Nix configuration for macOS and WSL.
 - The MBP and MBA intentionally share the full `nix/home/home.nix` Home Manager profile and currently mirror the same privileged Homebrew baseline. Keep their host modules separate so they can diverge later without changing host identity or UID handling.
 - Mac mini server: `darwinConfigurations.luna`, account `kerberos`; see `docs/luna-setup.md`.
 - WSL host: `nixosConfigurations.wsl`
+- Charon VPS (Tencent Cloud via SumoPod, Singapore): `nixosConfigurations.charon`, account `hades`; see `docs/charon-setup.md`.
 - Standalone macOS Home Manager profile: `homeConfigurations.hades`
 - Shared Home Manager profile: `nix/home/home.nix`
 - Primary reference docs: `docs/setup-guide.md`
@@ -16,7 +17,8 @@ This repository manages personal Nix configuration for macOS and WSL.
 ## Working Rules
 
 - Prefer the existing Nix module layout over introducing new structure.
-- Keep host-specific changes under `nix/hosts/mbp`, `nix/hosts/mba`, `nix/hosts/mac-mini`, or `nix/hosts/wsl`.
+- Keep host-specific changes under `nix/hosts/mbp`, `nix/hosts/mba`, `nix/hosts/mac-mini`, `nix/hosts/wsl`, or `nix/hosts/charon`.
+- Charon is internet-facing and the least trusted tailnet host: it is installed with `nixos-anywhere` and disko (erasing its disk), has no account passwords, and after bootstrap accepts SSH only from Tailscale addresses (`bootstrapPublicSsh` in `nix/hosts/charon/services.nix`). Docker binds unqualified published ports to `127.0.0.1` because Docker's iptables rules bypass the NixOS firewall; expose apps via `tailscale serve` or Caddy. The Macs have no Linux builder, so validate charon by evaluating `nixosConfigurations.charon.config.system.build.toplevel.drvPath` and build it on the VPS.
 - Luna uses the minimal `nix/home/server.nix` profile; do not import the laptop's desktop apps or hard-coded hades secrets into it. Its Home Manager is activated through the Darwin output.
 - Luna uses upstream Nix managed by nix-darwin, the Nix Tailscale system daemon (not Tailscale.app), and Colima as a system LaunchDaemon running as kerberos. Verify boot without GUI login on the actual mini before claiming unattended readiness.
 - First luna activation must run at its console with a valid authorized_keys already installed: SSH is restricted to Tailscale source ranges. FileVault and automatic login are manual owner decisions; no change to either is implied by activation. GUI agents need a separate session/permissions design.

@@ -47,6 +47,9 @@
     nixos-wsl.url = "github:nix-community/NixOS-WSL";
     nixos-wsl.inputs.nixpkgs.follows = "nixpkgs";
 
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
+
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -159,6 +162,18 @@
                   users.hades = import ./nix/home/home.nix;
                 };
               }
+            ];
+          };
+
+          charon = nixosSystem {
+            system = "x86_64-linux";
+
+            specialArgs = { inherit inputs; };
+
+            modules = [
+              inputs.disko.nixosModules.disko
+              ./nix/hosts/charon/configuration.nix
+              { nixpkgs = nixpkgsConfig; }
             ];
           };
         };
