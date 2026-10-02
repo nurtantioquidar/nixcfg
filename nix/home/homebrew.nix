@@ -23,6 +23,7 @@ let
     "rectangle"
     "scroll-reverser"
     "soundsource"
+    "stremio"
     "the-unarchiver"
     "zed"
   ];
