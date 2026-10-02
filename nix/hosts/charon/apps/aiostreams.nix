@@ -42,6 +42,10 @@ in
     partOf = [ "charon-apps.target" ];
     wantedBy = [ "charon-apps.target" ];
     unitConfig.ConditionPathExists = [ envFile "!${site.restorePending}" ];
+    # A container stopped mid-download (for example by a backup) leaves file
+    # locks that stall the next start until they expire after 300 s. Only one
+    # instance ever runs, so any lock present before it starts is stale.
+    preStart = "rm -f ${dataDir}/data/anime-database/*.lock";
   };
 
   # Tailnet-only HTTPS for Stremio; never Funnel. The serve config lives in
