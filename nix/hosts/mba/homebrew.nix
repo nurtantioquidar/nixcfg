@@ -45,6 +45,9 @@
       # ExpressVPN is preinstalled and managed by the company on this MBA.
       # Do not let Homebrew replace its app or privileged daemon.
       "cloudflare-warp"
+      # Package installer with a network extension; reaches charon's
+      # tailnet-only SSH.
+      "tailscale-app"
     ];
 
     onActivation = {

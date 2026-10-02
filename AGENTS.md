@@ -6,7 +6,7 @@ This repository manages personal Nix configuration for macOS and WSL.
 
 - Personal MacBook Pro: `darwinConfigurations.styx`, also exposed as `darwinConfigurations.MAC-F0Q3XN9HR9`, account `hades` UID 501. This former company laptop is personally owned through the laptop ownership program.
 - Company MacBook Air: `darwinConfigurations.MAC-YP2JJ9KNWT`, account `hades` UID 503. It is work-only and must not use the personal `styx` alias.
-- The MBP and MBA intentionally share the full `nix/home/home.nix` Home Manager profile and currently mirror the same privileged Homebrew baseline. Keep their host modules separate so they can diverge later without changing host identity or UID handling.
+- The MBP and MBA intentionally share the full `nix/home/home.nix` Home Manager profile and share a privileged Homebrew baseline, except that the MBA also installs the `tailscale-app` cask so it can reach charon's tailnet-only SSH. Keep their host modules separate so they can diverge later without changing host identity or UID handling.
 - Mac mini server: `darwinConfigurations.luna`, account `kerberos`; see `docs/luna-setup.md`.
 - WSL host: `nixosConfigurations.wsl`
 - Charon VPS (Tencent Cloud via SumoPod, Singapore): `nixosConfigurations.charon`, account `hades`; see `docs/charon-setup.md`.
