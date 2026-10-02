@@ -12,7 +12,7 @@ set -euo pipefail
 target=${1:?usage: provision.sh <user@new-public-ip> [--no-restore]}
 restore=${2:-}
 vault=${CHARON_OP_VAULT:-Personal}
-item=${CHARON_OP_ITEM:-charon}
+item=${CHARON_OP_ITEM:-host-secrets__nixos__charon__provision}
 repo=https://github.com/nurtantioquidar/nixcfg
 flake=$(cd "$(dirname "$0")/../../../.." && pwd)
 ip=${target#*@}

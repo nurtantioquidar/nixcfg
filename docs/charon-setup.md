@@ -5,7 +5,7 @@ Cloud instance in Singapore (2 vCPU, 8 GB RAM, 80 GB SSD). The account is
 `hades`, key-only, with passwordless sudo and no passwords anywhere.
 
 The host is disposable: its system comes from this flake, its secrets from
-the 1Password item `charon` (personal account, `Personal` vault), and its
+the 1Password item `host-secrets__nixos__charon__provision` (personal account, `Personal` vault), and its
 application data from the restic repository in R2. `provision.sh` puts all
 three onto any fresh KVM VPS.
 
@@ -83,10 +83,16 @@ SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.s
 ### Secrets in 1Password
 
 `nix/hosts/charon/scripts/save-secrets.sh` copies charon's restic repository,
-restic password, R2 keys and SSH host key into the `charon` item without
+restic password, R2 keys and SSH host key into the `host-secrets__nixos__charon__provision` item without
 printing them, archiving any previous version of the item. Rerun it after
 rotating any of these. `CHARON_OP_VAULT` and `CHARON_OP_ITEM` override the
 vault and item name for both scripts.
+
+The item holds only what `provision.sh` writes onto the server, files that a
+service on charon reads. Credentials used from a Mac or browser, or only to
+manage another credential (the R2 token's REST-API value, provider logins),
+get their own items, named `<kind>__<provider>__<resource>__<consumer>`, for
+example `api-token__cloudflare__r2__charon-restic`.
 
 ## Rebuilding
 

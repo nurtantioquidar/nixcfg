@@ -6,7 +6,7 @@ set -euo pipefail
 
 host=${CHARON_HOST:-hades@charon}
 vault=${CHARON_OP_VAULT:-Personal}
-item=${CHARON_OP_ITEM:-charon}
+item=${CHARON_OP_ITEM:-host-secrets__nixos__charon__provision}
 
 remote() { ssh -o BatchMode=yes "$host" "sudo $1"; }
 envvar() { remote "sed -n 's/^$1=//p' /var/lib/secrets/restic/env"; }
