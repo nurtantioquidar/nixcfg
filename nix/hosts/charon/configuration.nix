@@ -12,6 +12,7 @@ in
       ./disko.nix
       ./services.nix
       ./backup.nix
+      ./apps/aiostreams.nix
     ];
   };
 

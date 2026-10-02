@@ -61,7 +61,8 @@ case $TS_AUTHKEY in
 esac
 
 stage=$(mktemp -d)
-trap 'rm -rf "$stage"' EXIT
+work=$(mktemp -d)
+trap 'rm -rf "$stage" "$work"' EXIT
 umask 077
 secrets=$stage/var/lib/secrets
 mkdir -p "$secrets/restic" "$secrets/tailscale" "$stage/etc/ssh"
@@ -80,6 +81,25 @@ hostkey=$stage/etc/ssh/ssh_host_ed25519_key
 op read "$(ref ssh-host-ed25519-key)" | base64 --decode >"$hostkey"
 ssh-keygen -y -f "$hostkey" >"$hostkey.pub"
 chmod 644 "$hostkey.pub"
+
+# Each 1Password section <app> becomes /var/lib/secrets/<app>/env; field
+# labels in kebab-case turn back into variable names.
+op item get "$item" --vault "$vault" --reveal --format json >"$work/item.json"
+for app in $(jq -r '[.fields[].section.label? // empty] | unique[]' "$work/item.json"); do
+  case $app in
+    *[!a-z0-9-]* | "") echo "unexpected 1Password section name: $app" >&2; exit 1 ;;
+  esac
+  mkdir -p "$secrets/$app"
+  jq -r --arg app "$app" '.fields[] | select(.section.label? == $app)
+    | "\(.label | ascii_upcase | gsub("-"; "_"))=\(.value)"' "$work/item.json" >"$secrets/$app/env"
+done
+
+# Keep apps and backups from starting until charon-restore has run.
+if [ "$restore" != "--no-restore" ]; then
+  mkdir -p "$stage/var/lib/charon"
+  chmod 755 "$stage/var/lib/charon"
+  : >"$stage/var/lib/charon/restore-pending"
+fi
 
 echo "== Installing NixOS (this erases $disk)"
 nixx run github:nix-community/nixos-anywhere -- \

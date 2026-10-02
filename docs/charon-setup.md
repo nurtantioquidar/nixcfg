@@ -83,8 +83,12 @@ SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.s
 ### Secrets in 1Password
 
 `nix/hosts/charon/scripts/save-secrets.sh` copies charon's restic repository,
-restic password, R2 keys and SSH host key into the `host-secrets__nixos__charon__provision` item without
-printing them, archiving any previous version of the item. Rerun it after
+restic password, R2 keys, SSH host key and every app env file into the
+`host-secrets__nixos__charon__provision` item without printing them,
+archiving any previous version of the item. Each
+`/var/lib/secrets/<app>/env` becomes a section named `<app>` with one field
+per variable, labelled in kebab-case (`SECRET_KEY` is `secret-key`);
+`provision.sh` turns each section back into that file. Rerun it after
 rotating any of these. `CHARON_OP_VAULT` and `CHARON_OP_ITEM` override the
 vault and item name for both scripts.
 
@@ -113,11 +117,13 @@ Every application keeps its state under `/srv/<app>`. Everything else is
 rebuildable from this flake, so restic backs up `/srv` only. It runs daily at
 19:00 UTC (02:00 WIB), then prunes to 7 daily, 4 weekly and 6 monthly
 snapshots, then verifies 2% of the data. The unit is skipped, not failed,
-until all three credential files exist in `/var/lib/secrets/restic/`.
+until all three credential files exist in `/var/lib/secrets/restic/`, and
+while a restore is pending.
 
-Applications using SQLite must not rely on a plain file copy: give each one
-a `backupPrepareCommand` that writes a consistent dump (for example
-`sqlite3 db ".backup db.bak"`) into its `/srv/<app>` directory.
+Each run stops `charon-apps.target` first and starts it again afterwards,
+even when a step fails, so every app's files (SQLite included) are
+consistent without per-app dumps. Apps are down for the length of the run,
+under a minute at the current size.
 
 ### Credentials (first setup only)
 
@@ -158,19 +164,57 @@ sudo systemctl start restic-backups-offsite   # first run initialises the reposi
 journalctl -u restic-backups-offsite -e
 sudo restic-offsite snapshots
 sudo restic-offsite restore latest --target /tmp/restore --include /srv/<app>
-sudo charon-restore   # whole /srv in place; refuses to overwrite data without --force
+sudo charon-restore   # whole /srv in place
 ```
 
-Applications must be `partOf` and `wantedBy` `charon-apps.target`, so that
-`charon-restore` can stop them during a restore and start them again.
+On a fresh install, `provision.sh` creates `/var/lib/charon/restore-pending`,
+so apps and backups stay stopped until `charon-restore` has run and removed
+it. On a running host, `charon-restore` refuses while `/srv` holds app files;
+`--force` first moves the current contents to `/srv.pre-restore-<time>`, so
+stale files (such as SQLite WAL files) never mix with the restored ones.
+
+## Applications
+
+Each app is a module `nix/hosts/charon/apps/<app>.nix`, imported from
+`configuration.nix`, following AIOStreams:
+
+- Container through `virtualisation.oci-containers`, image pinned to a
+  release tag, published only on `127.0.0.1`, non-root, read-only root,
+  all capabilities dropped, memory-capped.
+- State in `/srv/<app>`; rebuildable caches added to the restic `exclude`.
+- Secrets in root-only `/var/lib/secrets/<app>/env`, then
+  `save-secrets.sh`. Generate them on charon so they never pass through a
+  chat or shell history.
+- The unit is `partOf` and `wantedBy` `charon-apps.target`, with
+  `ConditionPathExists` on its env file and on `!/var/lib/charon/restore-pending`
+  (see `apps/site.nix`).
+- Tailnet-only HTTPS through a `tailscale-serve-<app>` oneshot, one HTTPS
+  port per app on `https://charon.tail8801a4.ts.net`. Never Funnel.
+- Test a restore after adding it.
+
+Tailscale Serve and HTTPS certificates were enabled for the tailnet on
+2026-10-02. Certificate names are public in Certificate Transparency logs.
+
+### AIOStreams
+
+- URL: `https://charon.tail8801a4.ts.net` (port 443), tailnet devices only.
+- Dashboard login: user `hades`, password in the `aiostreams` section of the
+  1Password item (`aiostreams-auth`, after `hades:`).
+- `secret-key` encrypts every saved config and must never change; it is
+  restored with the item.
+- The TorBox key is entered in the AIOStreams configuration, stored encrypted
+  in its database and backed up with it. Keep your copy in its own item,
+  `api-key__torbox__account__aiostreams`.
+- In Stremio (iPad, Mac, any device running Tailscale), install the
+  manifest URL the configure page gives you after saving.
+- Upgrades: change the image tag in `apps/aiostreams.nix`, then rebuild.
 
 Test a restore after adding each application.
 
 ## Next layers
 
-- Applications as Docker Compose stacks under `/srv/<app>`: AIOStreams and
-  Hermes Agent tailnet-only through `tailscale serve`; Hermes uses its Docker
-  terminal backend, an allowlisted chat user, and no Docker socket.
+- Hermes Agent as the next app module: tailnet-only, its Docker terminal
+  backend, an allowlisted chat user, and no Docker socket.
 - Caddy with TCP 80/443 for monet.sh once its DNS is set up.
 - Obsidian: iCloud does not sync to Linux; a vault on charon needs a separate
   sync path such as Syncthing from a Mac.
