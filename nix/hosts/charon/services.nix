@@ -46,7 +46,8 @@ in
   networking.firewall = {
     enable = true;
     trustedInterfaces = [ config.services.tailscale.interfaceName ];
-    # Public web ports open only when Caddy is added for monet.sh.
+    # No public web ports: monet.sh is on Cloudflare Pages. Open 80/443 only
+    # if a public backend (Caddy) moves onto charon.
     allowedTCPPorts = if bootstrapPublicSsh then [ 22 ] else [ ];
     logRefusedConnections = false;
   };

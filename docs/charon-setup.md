@@ -215,6 +215,8 @@ Test a restore after adding each application.
 
 - Hermes Agent as the next app module: tailnet-only, its Docker terminal
   backend, an allowlisted chat user, and no Docker socket.
-- Caddy with TCP 80/443 for monet.sh once its DNS is set up.
+- monet.sh itself is a static site on Cloudflare Pages (project `monet-hub`),
+  not on charon. Caddy with TCP 80/443 is needed only if a public monet
+  backend (for example titikapi or the Inver gateway) is hosted here.
 - Obsidian: iCloud does not sync to Linux; a vault on charon needs a separate
   sync path such as Syncthing from a Mac.
