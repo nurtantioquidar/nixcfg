@@ -9,7 +9,6 @@ _:
       fi
 
       export GPG_TTY=$(tty)
-      ssh-add --apple-load-keychain 2> /dev/null
 
       export PATH="/usr/bin:$PATH"
       export PATH="/opt/homebrew/bin:$PATH"

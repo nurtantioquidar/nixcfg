@@ -4,7 +4,7 @@ This repository manages these host and user profiles:
 
 - `darwinConfigurations.styx` for the personal MacBook Pro, also exposed as `darwinConfigurations.MAC-F0Q3XN9HR9` (`hades`, UID 501).
 - `darwinConfigurations.MAC-YP2JJ9KNWT` for the company MacBook Air (`hades`, UID 503); it is intentionally not the personal `styx` alias.
-- The two laptops intentionally share the full Home Manager profile and currently mirror the same privileged Homebrew baseline, while retaining separate host modules for future divergence.
+- The two laptops intentionally share the full Home Manager profile and most of the privileged Homebrew baseline, while retaining separate host modules. The MBA also installs Tailscale; ExpressVPN is excluded from Homebrew on both laptops.
 - `nixosConfigurations.wsl` for the NixOS-WSL host.
 - `homeConfigurations.hades` for standalone macOS Home Manager activation.
 - `darwinConfigurations.luna` for the Mac mini server (`kerberos`). Follow
@@ -35,6 +35,10 @@ sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 ```
 
 Select the personal MacBook Pro with `#styx` or `#MAC-F0Q3XN9HR9`. Select the company MacBook Air only with `#MAC-YP2JJ9KNWT`.
+
+For a fresh personal MBP installation or user-state transfer, follow
+[Styx migration](styx-migration.md), including credential restoration and first
+Homebrew activation troubleshooting.
 
 For the first activation on the company MacBook Air, verify that `id -u hades`
 prints `503`, then run:

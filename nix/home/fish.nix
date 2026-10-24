@@ -11,10 +11,6 @@
       # Set GPG_TTY using fish command substitution.
       set -x GPG_TTY (tty)
 
-      if command -q ssh-add
-          ssh-add --apple-load-keychain 2> /dev/null
-      end
-
       fish_add_path -amP /usr/bin
       fish_add_path -amP /opt/homebrew/bin
       fish_add_path -amP /opt/local/bin

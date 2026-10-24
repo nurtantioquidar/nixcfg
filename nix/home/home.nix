@@ -37,6 +37,7 @@ in
       htop
       curl
       coreutils
+      gitleaks
       jq
       nixpkgs-fmt
       nerd-fonts.fira-code

@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   nix-homebrew = {
@@ -26,6 +26,20 @@
     };
   };
 
+  # nix-homebrew creates the Taps parent as root on a fresh installation.
+  # Home Manager needs a writable namespace for its unpinned crmne/tap.
+  system.activationScripts.setup-homebrew.text = pkgs.lib.mkAfter ''
+    if [ ! -d /opt/homebrew/Library/Taps ] || [ -L /opt/homebrew/Library/Taps ]; then
+      echo "Expected an ordinary Homebrew Taps directory." >&2
+      exit 1
+    fi
+    if [ -L /opt/homebrew/Library/Taps/crmne ]; then
+      echo "Refusing to change a symlinked crmne tap namespace." >&2
+      exit 1
+    fi
+    /usr/bin/install -d -o hades -g admin -m 0755 /opt/homebrew/Library/Taps/crmne
+  '';
+
   homebrew = {
     enable = true;
 
@@ -42,7 +56,6 @@
       "pritunl"
       "mullvad-vpn"
       "1password"
-      "expressvpn"
       "cloudflare-warp"
     ];
 

@@ -30,6 +30,7 @@ let
 
   # These were briefly user-managed during the Homebrew split, but they are
   # installer/pkg casks that do not honor the user appdir cleanly.
+  # Keep these cleanup exemptions even when a cask is no longer declared by Darwin.
   systemCasks = [
     "expressvpn"
     "mullvad-vpn"
@@ -71,6 +72,10 @@ in
           # session variable also redirects Darwin-owned system casks here.
           export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
           export HOMEBREW_NO_AUTO_UPDATE=1
+
+          # Generated completions run in a sandbox that can write the leaf
+          # directory but cannot create its missing parents on a fresh prefix.
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/mkdir -p /opt/homebrew/share/pwsh/completions
 
           # Trust only the exact third-party casks Home Manager installs,
           # not their full taps.
