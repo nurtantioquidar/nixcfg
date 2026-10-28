@@ -272,6 +272,28 @@ op vault list
 
 If multiple accounts are configured in the desktop app, run `op signin` to select one.
 
+## Jira CLI
+
+The shared Home Manager profile installs [jira-cli](https://github.com/ankitpokhrel/jira-cli)
+as `jira` through the Nix package `jira-cli-go`, including shell completions.
+
+For Jira Cloud, create an [Atlassian API token](https://id.atlassian.com/manage-profile/security/api-tokens).
+On macOS, store it in the login Keychain using Keychain Access: create a password
+item named `jira-cli`, set its account to your Jira login email, and use the API
+token as its password. The CLI reads this item directly. Keep tokens out of the
+flake and shell startup files.
+
+Initialize your local configuration, then select a default project and board:
+
+```bash
+jira init --installation cloud --server https://YOUR-SITE.atlassian.net --login YOUR-EMAIL
+jira me
+jira issue list
+```
+
+The generated configuration lives at `~/.config/.jira/.config.yml` by default.
+Use `jira sprint list` for the interactive sprint view.
+
 ## 1Password Git Signing
 
 The macOS Git signing setup is enabled only when `sshSigningKey` is configured:

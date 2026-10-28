@@ -39,6 +39,7 @@ in
       coreutils
       gitleaks
       jq
+      jira-cli-go
       nixpkgs-fmt
       nerd-fonts.fira-code
       nerd-fonts.jetbrains-mono
