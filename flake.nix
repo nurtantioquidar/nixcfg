@@ -13,7 +13,7 @@
     flake-utils.url = "github:numtide/flake-utils";
 
     herdr = {
-      url = "github:herdrdev/herdr/v0.9.1";
+      url = "github:herdrdev/herdr/v0.9.5";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
