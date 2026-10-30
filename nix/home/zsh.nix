@@ -1,49 +1,53 @@
-_:
+{ pkgs, ... }:
 {
   programs.zsh = {
     enable = true;
 
-    initContent = ''
-      if [ -e "$HOME/.env" ]; then
-        source "$HOME/.env"
-      fi
+    initContent = pkgs.lib.mkMerge [
+      (pkgs.lib.mkBefore ''
+        # App-launched non-login shells need Nix packages before plugins load.
+        export PATH="/usr/bin:$PATH"
+        export PATH="/opt/homebrew/bin:$PATH"
+        export PATH="/opt/local/bin:$PATH"
+        if [ -d "/etc/profiles/per-user/$USER/bin" ]; then
+          export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
+        fi
+        export PATH="/run/current-system/sw/bin:$PATH"
+        if [ -d "$HOME/.nix-profile/bin" ]; then
+          export PATH="$HOME/.nix-profile/bin:$PATH"
+        fi
+        export PATH="$HOME/.local/bin:$PATH"
+      '')
+      ''
+        if [ -e "$HOME/.env" ]; then
+          source "$HOME/.env"
+        fi
 
-      export GPG_TTY=$(tty)
+        export GPG_TTY=$(tty)
 
-      export PATH="/usr/bin:$PATH"
-      export PATH="/opt/homebrew/bin:$PATH"
-      export PATH="/opt/local/bin:$PATH"
-      if [ -d "/etc/profiles/per-user/$USER/bin" ]; then
-        export PATH="/etc/profiles/per-user/$USER/bin:$PATH"
-      fi
-      export PATH="/run/current-system/sw/bin:$PATH"
-      if [ -d "$HOME/.nix-profile/bin" ]; then
-        export PATH="$HOME/.nix-profile/bin:$PATH"
-      fi
-      export PATH="$HOME/.local/bin:$PATH"
+        # Google Cloud SDK
+        if [ -e "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc" ]; then
+          source "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc"
+        fi
+        if [ -e "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc" ]; then
+          source "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc"
+        fi
 
-      # Google Cloud SDK
-      if [ -e "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc" ]; then
-        source "/opt/homebrew/share/google-cloud-sdk/path.zsh.inc"
-      fi
-      if [ -e "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc" ]; then
-        source "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc"
-      fi
+        export SDKMAN_DIR="$HOME/.sdkman"
+        [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
 
-      export SDKMAN_DIR="$HOME/.sdkman"
-      [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
-
-      # Ghostty/Zellij can encode Option+Arrow as modified arrow escape
-      # sequences. Bind the common forms so zle does not insert trailing C/D.
-      bindkey '\eb' backward-word
-      bindkey '\ef' forward-word
-      bindkey '\e[1;3D' backward-word
-      bindkey '\e[1;3C' forward-word
-      bindkey '\e[1;9D' backward-word
-      bindkey '\e[1;9C' forward-word
-      bindkey '\e\e[D' backward-word
-      bindkey '\e\e[C' forward-word
-    '';
+        # Ghostty/Zellij can encode Option+Arrow as modified arrow escape
+        # sequences. Bind the common forms so zle does not insert trailing C/D.
+        bindkey '\eb' backward-word
+        bindkey '\ef' forward-word
+        bindkey '\e[1;3D' backward-word
+        bindkey '\e[1;3C' forward-word
+        bindkey '\e[1;9D' backward-word
+        bindkey '\e[1;9C' forward-word
+        bindkey '\e\e[D' backward-word
+        bindkey '\e\e[C' forward-word
+      ''
+    ];
 
     syntaxHighlighting.enable = true;
     autosuggestion.enable = true;
