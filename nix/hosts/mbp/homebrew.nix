@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ inputs, pkgs, lib, ... }:
 
 {
   nix-homebrew = {
@@ -39,6 +39,21 @@
     fi
     /usr/bin/install -d -o hades -g admin -m 0755 /opt/homebrew/Library/Taps/crmne
   '';
+
+  # Keep personal-only app bundles user-owned without adding them to the
+  # shared Home Manager cask list used by the company MBA and standalone profile.
+  home-manager.users.hades.home.activation.installStyxHomebrewCasks =
+    lib.hm.dag.entryAfter [ "installUserHomebrewCasks" ] ''
+      if [ -x /opt/homebrew/bin/brew ]; then
+        $DRY_RUN_CMD /usr/bin/env \
+          HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications" \
+          HOMEBREW_NO_AUTO_UPDATE=1 \
+          HOMEBREW_NO_INSTALL_FROM_API=1 \
+          /opt/homebrew/bin/brew bundle install --no-upgrade --file "${pkgs.writeText "styx-homebrew-Brewfile" ''
+            cask "google-chrome"
+          ''}"
+      fi
+    '';
 
   homebrew = {
     enable = true;

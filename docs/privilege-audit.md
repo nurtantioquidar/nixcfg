@@ -17,6 +17,7 @@ The Apple container migration in September 2026 supersedes historical OrbStack e
 | User packages, shells, Git, prompt, dotfiles, Codex CLI, npm globals | Home Manager under `nix/home` | `nix/home/home.nix`, `nix/home/codex.nix`, `nix/home/node-packages.nix` | Validate with the standalone `homeConfigurations.hades.activationPackage` build; activate with `home-manager switch` only when applying user state. |
 | Ordinary user Homebrew app casks | User Homebrew module | `nix/home/homebrew.nix` | Preserve the current cask membership during audit-only work. Removing a previously managed cask can uninstall it during Home Manager activation unless explicitly exempted. |
 | Current user cask baseline | User Homebrew module | `nix/home/homebrew.nix` | Current entries include `caffeine`, `iina`, `jetbrains-toolbox`, `rectangle`, `scroll-reverser`, `the-unarchiver`, `crmne/tap/spotifast`, `soundsource`, `claude`, and `suruseas/opossum/opossum`. The Opossum cask pulls in Homebrew's Apple `container` formula; see `docs/apple-container.md`. |
+| Personal Styx Chrome | User Homebrew activation in the MBP module | `nix/hosts/mbp/homebrew.nix`, `nix/hosts/mbp/configuration.nix` | Install at `/Users/hades/Applications/Google Chrome.app`, owned by `hades`; use the same path in Styx's Dock. Keep it out of privileged Darwin casks and Nix app packages. The shared standalone profile and company MBA do not install it. |
 | Privileged/system Homebrew casks | Darwin Homebrew module | `nix/hosts/mbp/homebrew.nix`, `nix/hosts/mba/homebrew.nix` | Keep VPN/security/system-helper casks on the Darwin/admin path unless a later explicit admin-window plan moves them. |
 | Homebrew bootstrap, pinned taps, Rosetta, cleanup policy | nix-darwin / nix-homebrew | `nix/hosts/mbp/homebrew.nix`, `nix/hosts/mba/homebrew.nix` | Keep `homebrew.onActivation.cleanup = "none"` unless intentionally pruning with explicit approval. |
 | System account, login shell registration, hostnames, Nix daemon/global settings | nix-darwin / NixOS | `nix/hosts/mbp/configuration.nix`, `nix/hosts/mba/configuration.nix`, `nix/hosts/wsl/configuration.nix` | Requires the appropriate system rebuild path and should not be changed by user-level Home Manager activation. |
@@ -142,6 +143,10 @@ For this migration, the cleaner VS Code target is package-only Home Manager owne
 - Do not import `nix/home/vscode.nix` as-is unless the intent changes, because it currently manages extensions and user settings declaratively.
 
 ## Historical Migration Notes: Movable To Home Manager
+
+The Chrome Nix-package examples below record an earlier approach. Current Styx
+Chrome uses the user Homebrew activation and path in Current Operating State;
+do not restore those old package declarations.
 
 These are currently in the Darwin/system layer but can be moved to Home Manager with little or no functional loss.
 
@@ -561,7 +566,7 @@ Batch 1:
 
 - Move `environment.systemPackages` from `nix/hosts/mbp/configuration.nix` to `home.packages`.
 - Initial candidates: `mkalias`, `neovim`, `tmux`, `google-chrome`.
-- Status: `mkalias`, Neovim, tmux, and CLI/dev tools are Home Manager-managed. `google-chrome` was moved back to Homebrew with the other normal GUI apps because Homebrew app bundles are more reliable than Home Manager symlinks into `/nix/store`.
+- Status: `mkalias`, Neovim, tmux, and CLI/dev tools are Home Manager-managed. `google-chrome` uses the MBP module's user Homebrew activation, installing at `/Users/hades/Applications/Google Chrome.app`; keep its Dock entry at that same user path.
 
 Batch 2:
 
@@ -688,7 +693,8 @@ These are now user-level:
 - `nerd-fonts.jetbrains-mono`
 - `nerd-fonts.fira-code`
 
-Reduced this Dock defaults block:
+Reduced this Dock defaults block. The example below uses the current Styx user
+path for Chrome:
 
 ```nix
 system.defaults.dock = {
@@ -699,7 +705,7 @@ system.defaults.dock = {
   tilesize = 30;
   persistent-apps = [
     "/Applications/Windsurf.app"
-    "/Applications/Google Chrome.app"
+    "/Users/hades/Applications/Google Chrome.app"
     "/Applications/Slack.app"
     "/Applications/WezTerm.app"
   ];
@@ -818,12 +824,12 @@ brew list --formula
 brew list --cask
 ```
 
-Final outcome:
+Historical outcome of that admin window (superseded by Current Operating State):
 
 - `brew list --formula` is empty.
 - `brew list --cask` contains normal GUI apps and privileged/system apps: `1password`, `brave-browser`, `caffeine`, `chatgpt`, `cmux`, `expressvpn`, `ghostty`, `google-chrome`, `iina`, `jetbrains-toolbox`, `lens`, `mullvad-vpn`, `obsidian`, `orbstack`, `pritunl`, `rectangle`, `scroll-reverser`, `slack`, `soundsource`, `spotify`, `the-unarchiver`, `visual-studio-code`, `zed`, and `zoom`.
 - `~/Applications/home-manager-apps` contains only `pinentry-mac.app`.
-- The normal GUI apps are installed under `/Applications` by Homebrew.
+- At that time, normal GUI apps were installed under `/Applications` by Homebrew. Current ordinary user casks install under `~/Applications`; Styx Chrome specifically lives at `/Users/hades/Applications/Google Chrome.app` and uses the matching Dock path.
 - `codex` resolves from `~/.local/bin/codex` after `nix/home/codex.nix` installs OpenAI's standalone CLI.
 - `codex-upgrade` resolves from the Home Manager profile and reruns the official standalone installer without sudo.
 - `ngrok` resolves from the Home Manager profile.

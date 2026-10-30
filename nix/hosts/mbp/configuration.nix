@@ -28,7 +28,7 @@ in
       dock = {
         persistent-apps = [
           "/Applications/Windsurf.app"
-          "/Applications/Google Chrome.app"
+          "/Users/hades/Applications/Google Chrome.app"
           "/Applications/Slack.app"
           "/Applications/WezTerm.app"
         ];

@@ -203,3 +203,11 @@ Confirm app installs and terminal config, and transfer any needed working trees
 to their original locations. Remove temporary SSH bootstrap keys once permanent
 access works. Keep the source untouched until restore verification succeeds;
 remove private staging exports when they are no longer needed.
+
+Verify Styx Chrome at `~/Applications/Google Chrome.app`, owned by `hades`, with
+the same user path in the MBP Dock configuration. Its personal-only user Homebrew
+activation lives in `nix/hosts/mbp/homebrew.nix`. An existing system installation
+needs a one-time user-level reinstall with `--appdir="$HOME/Applications"`; see
+[Chrome installation and startup troubleshooting](setup-guide.md). If it crashes
+immediately, check ownership of `~/Library/Application Support/Google` before
+resetting browser data; an empty root-owned directory blocked Chrome on styx.

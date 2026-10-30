@@ -109,7 +109,11 @@ Dock persistent apps remain in nix-darwin for now because nix-darwin exposes a r
 
 Spotlight must be enabled for user apps to appear in Spotlight search. If `mdutil -s "$HOME"` reports that the Spotlight server is disabled, app registration and `mdimport` will not make those apps searchable until Spotlight is enabled by policy or admin action.
 
-Normal macOS GUI apps should stay out of Home Manager unless a specific app has been proven reliable from Home Manager. Home Manager links app bundles into `~/Applications/home-manager-apps` as symlinks to `/nix/store`; several GUI apps failed macOS code-signing/Gatekeeper checks from that location. Keep Home Manager focused on CLI/dev tools and user-scoped configuration.
+Ordinary macOS GUI apps use Home Manager's user Homebrew activation to install
+real app bundles under `~/Applications`. Nix-packaged app bundles linked through
+`~/Applications/home-manager-apps` point into `/nix/store`; several GUI apps failed
+macOS code-signing/Gatekeeper checks from that location. Use Nix app packages only
+when the specific app has been proven reliable.
 
 Ordinary Homebrew casks are declared in `nix/home/homebrew.nix`. The laptop profile uses Opossum's cask and its Apple `container` formula dependency instead of OrbStack. See [Apple container setup](apple-container.md) before switching existing Compose projects.
 
@@ -130,6 +134,25 @@ The module writes `~/.config/homebrew/Brewfile` and runs `brew bundle install --
 Tinycast, cmux, and AeroSpace are installed from pinned third-party taps. The activation trusts only their exact casks, rather than any complete third-party tap. Ghostty is also installed as a user cask, while `nix/home/ghostty.nix` owns its configuration. `nix/home/tinycast.nix` manages Tinycast's launcher search scopes and places `~/Applications/Claude.app` before `/Applications`, ensuring Tinycast keeps the user-owned, upgradeable Claude Desktop bundle when both copies share the same bundle identifier.
 
 The user-level Brewfile does not run `brew bundle cleanup`. Cleanup is intentionally manual because Homebrew cleanup sees all installed casks, including privileged casks owned by the Darwin profile. Removing a cask from the user-managed list can still uninstall a previously managed cask during Home Manager activation unless that cask remains explicitly exempted or is moved through an approved user/admin flow. For drift audits, compare declared lists and `brew list --cask` output as a report-only check; do not uninstall or cleanup as part of the audit.
+
+Chrome on styx lives at `/Users/hades/Applications/Google Chrome.app`, owned by
+`hades`. `nix/hosts/mbp/homebrew.nix` installs it through a separate user Home
+Manager Brewfile after the shared casks, with `--appdir=$HOME/Applications` and
+`--no-upgrade`. Styx's Dock entry uses the same user path. Keep Chrome out of
+Darwin `homebrew.casks` and Nix app packages. This activation runs through the
+styx Darwin profile; the company MBA and standalone shared Home Manager profile
+do not install Chrome. The MBA's existing system Chrome Dock entry is independent
+of Styx's user installation.
+
+An existing Chrome installation is not moved between app directories automatically.
+For a one-time relocation, quit Chrome and run as the normal user:
+
+```sh
+brew reinstall --cask --appdir="$HOME/Applications" google-chrome
+```
+
+Do not use `sudo` or `--zap` for this app relocation. The browser profile stays
+under `~/Library/Application Support/Google/Chrome`.
 
 ## Codex CLI
 
@@ -349,6 +372,27 @@ sudo nixos-rebuild switch --flake ~/.config/nix#wsl
 ```
 
 ## Troubleshooting
+
+### Chrome Crashes Immediately on Startup
+
+On styx, Chrome 156 crashed with `EXC_BREAKPOINT (SIGTRAP)` from both application
+directories. Startup stderr reported `Failed to get the path for 1001`, and
+`~/Library/Application Support/Google` was empty and owned by root, preventing
+Chrome from creating its profile. Moving or reinstalling the app did not fix
+the data-directory permissions.
+
+Inspect the directory's owner and contents first. For this confirmed empty,
+root-owned directory, the owner repaired it locally with:
+
+```sh
+sudo chown "$(id -u):$(id -g)" "$HOME/Library/Application Support/Google"
+open "$HOME/Applications/Google Chrome.app"
+```
+
+Chrome then opened successfully. Change only the affected directory's ownership;
+do not recursively chown the Library or delete browser data. Gatekeeper accepted
+the app even though strict code-signature verification separately complained
+about Finder metadata; that complaint did not cause this startup failure.
 
 ### Homebrew Cask API Fails During Rebuild
 
