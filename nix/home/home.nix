@@ -55,7 +55,7 @@ in
       google-cloud-sdk
       grafana-loki
     ] ++ lib.optionals pkgs.stdenv.isDarwin [
-      _1password-cli
+      # The 1Password CLI comes from each Mac's `programs._1password` (/usr/local/bin/op), not here.
       argocd
       bun
       cloudflared

@@ -44,6 +44,7 @@ This repository manages personal Nix configuration for macOS and WSL.
 - Keep local secrets outside this flake. The expected external secrets path is documented in `docs/setup-guide.md`.
 - Git SSH signing verification is managed through Home Manager. `nix/home/git.nix` writes `~/.config/git/allowed_signers` from the external `userEmail` and `sshSigningKey` values when 1Password signing is enabled.
 - SSH and Git signing use the 1Password agent. Do not add `ssh-add --apple-load-keychain` to shell startup. Claude's migration helper writes to the local login Keychain, not iCloud Keychain; do not conflate those stores when discussing its authentication. A 1Password-backed Claude setup-token flow has feature limits and must preserve the user's billing and feature preferences.
+- The 1Password CLI is installed by each Mac's nix-darwin `programs._1password` at `/usr/local/bin/op`, the only path the app's CLI integration (Touch ID sign-in) accepts. Do not add `_1password-cli` to Home Manager packages: a copy earlier on PATH falls back to master-password sign-in ("could not find session token"). The stale pre-Darwin profile at `~/.nix-profile` (`home-manager-path` from 2026-10-03) still shadows PATH with an old `op`.
 - Do not mutate Nix store paths or Nix-managed Homebrew tap symlinks directly. Change flake inputs or Nix modules instead.
 - Use `rg` for repository search.
 - Use `nixpkgs-fmt` for Nix formatting when editing Nix files.

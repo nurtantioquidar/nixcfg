@@ -41,6 +41,10 @@ in
 
   programs.fish.enable = true;
 
+  # Installs the 1Password CLI at /usr/local/bin/op, the only path the 1Password app's CLI
+  # integration accepts; a Nix store or Home Manager copy falls back to master-password sign-in.
+  programs._1password.enable = true;
+
   users.users.hades = {
     uid = 503;
     home = "/Users/hades";
